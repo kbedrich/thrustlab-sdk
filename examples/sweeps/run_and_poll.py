@@ -18,7 +18,7 @@ project = client.projects.create(name="sdk sweep example")
 # Resolve by name, or paste explicit IDs: motor_id = "comp_motor_xxx"
 motor = client.components.find(name="Spektrum Avian 4260 800Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="4S 5000mAh")
+battery = client.components.find(name="Liperior 5000mAh 4S 35C")
 
 sweep = client.sweeps.create(
     project_id=project["id"],

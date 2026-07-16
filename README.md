@@ -4,6 +4,9 @@
 [![Python](https://img.shields.io/pypi/pyversions/thrustlab.svg)](https://pypi.org/project/thrustlab/)
 [![License](https://img.shields.io/pypi/l/thrustlab.svg)](https://github.com/kbedrich/thrustlab-sdk/blob/main/LICENSE)
 
+The official Python client for [ThrustLab](https://thrustlab.com) —
+electric-UAV powertrain simulation as an API.
+
 ## Install
 
 ```bash
@@ -56,18 +59,17 @@ Runnable end-to-end examples for every simulation type live in
 
 ## Why the SDK (and not `urllib` / `wget`)?
 
-Use this SDK — or, if you hand-roll a client, an HTTP library that is **not**
-stdlib `urllib`. Requests from Python's `urllib.request` (and `wget`) are
-**blocked at the Cloudflare edge** by a managed WAF rule matching the literal
-`Python-urllib/*` User-Agent. The block is terminated at the edge: the request
-**never reaches the ThrustLab API**, so you get an opaque HTML *error 1010*
-challenge page — **not** a JSON error envelope. The API cannot return a
-structured error for a request it never sees.
+The SDK gives you automatic retries with backoff, idempotency keys, cursor
+pagination, polling helpers, webhook signature verification, and typed
+errors. It is built on [`httpx`](https://www.python-httpx.org/) and sends
+its own `thrustlab-python/<version>` User-Agent.
 
-This SDK is built on [`httpx`](https://www.python-httpx.org/) and sends its own
-`thrustlab-python/<version>` User-Agent, so it is **unaffected**. If you must
-hand-roll a client, set an explicit non-`urllib` `User-Agent` header (e.g.
-`requests`, `httpx`, or `curl`) and you will reach the API normally.
+If you hand-roll a client anyway, use an HTTP library with a descriptive
+User-Agent (`httpx`, `requests`, or `curl`). ThrustLab's edge protection
+screens non-browser User-Agents such as stdlib `Python-urllib/*` and `wget`:
+API paths under `/v1/` are exempt from the screening, but every other route
+blocks these at the edge with an opaque *error 1010* page — the request never
+reaches ThrustLab, so no JSON error envelope is possible there.
 
 ## Configuration
 
@@ -184,10 +186,12 @@ client = Client(max_retries=0)
 
 ## Links
 
+- Website: https://thrustlab.com
 - Documentation: https://thrustlab.com/docs
 - API reference: https://thrustlab.com/docs/reference
 - SDK guide: https://thrustlab.com/docs/sdk/python
 - Changelog: https://thrustlab.com/docs/changelog
+- Source: https://github.com/kbedrich/thrustlab-sdk
 - Issue tracker: https://github.com/kbedrich/thrustlab-sdk/issues
 
 ## License

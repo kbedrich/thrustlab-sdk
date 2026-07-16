@@ -4,9 +4,9 @@ Run it:
     export THRUSTLAB_API_KEY=key_...        # never hard-code the key
     python examples/simulations/run_sync.py
 
-The verification combo below (Spektrum Avian 4260 800 kV + 10.5x4.5 + 4S 5000 mAh
-@ 70% throttle, static) converges to ~9.81 N / ~8658 rpm. Swap in your own
-component IDs, or resolve them by name with client.components.find(...).
+The verification combo below (Spektrum Avian 4260 800 kV + 10.5x4.5 + Liperior
+4S 5000 mAh @ 70% throttle, static) converges to ~9.78 N / ~8645 rpm. Swap in
+your own component IDs, or resolve them by name with client.components.find(...).
 """
 
 from thrustlab import Client
@@ -20,7 +20,7 @@ project = client.projects.create(name="sdk single-point example")
 #   motor_id = "comp_motor_xxx"
 motor = client.components.find(name="Spektrum Avian 4260 800Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="4S 5000mAh")
+battery = client.components.find(name="Liperior 5000mAh 4S 35C")
 
 sim = client.simulations.create(
     project_id=project["id"],

@@ -23,7 +23,7 @@ for component in islice(client.components.list(type="motor"), 5):
 # round-trip the list yourself. Or paste explicit IDs from the catalog.
 motor = client.components.find(name="Spektrum Avian 4260 800Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="4S 5000mAh")
+battery = client.components.find(name="Liperior 5000mAh 4S 35C")
 
 # Run a single-point simulation and wait for the result.
 sim = client.simulations.create(
