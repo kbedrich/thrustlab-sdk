@@ -45,18 +45,24 @@ dyn = client.dynamic_simulations.create(
             "propeller_component_id": prop["id"],
         }
     ],
-    # Hold 70% throttle, static, until the pack depletes.
+    # Ramp to 70% over 2 s (soft-start — a throttle step onto a stationary
+    # rotor sags the pack below the low-voltage cutoff), then hold for 20 s.
     schedule={
         "mode": "segments",
         "segments": [
             {
-                "until_depleted": True,
+                "duration_s": 2.0,
+                "airspeed_target": 0.0,
+                "per_group": {"main": {"throttle_target": 70, "throttle_ramp": "linear"}},
+            },
+            {
+                "duration_s": 20.0,
                 "airspeed_target": 0.0,
                 "per_group": {"main": {"throttle_target": 70}},
-            }
+            },
         ],
     },
-    termination={"mode": "until_depleted", "soc_cutoff_pct": 20.0},
+    termination={"mode": "fixed"},
 )
 result = client.dynamic_simulations.wait(dyn["id"], timeout=600)
 print(f"dynamic status: {result['status']}")

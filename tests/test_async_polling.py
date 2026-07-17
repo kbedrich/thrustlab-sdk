@@ -16,7 +16,7 @@ from thrustlab._async_polling import TERMINAL_STATES, poll_until_terminal
 
 def test_terminal_states_constant():
     # These are the EXACT wire values the v1 API emits (see
-    # the v1 serializer ``_DB_TO_V1``). A prior version of the
+    # backend/app/v1/_async_serialize.py ``_DB_TO_V1``). A prior version of the
     # SDK used {"succeeded","failed","cancelled"}, which never matched the server
     # → wait() looped to its full timeout and returned a bogus "timed_out" on
     # every successful run. Guard against that regression from both sides.

@@ -1,9 +1,13 @@
 """``client.starred_components`` — per-project component starring.
 
+Stars are first-class resources with their own ``star_<ksuid>`` id: adding a
+star returns the star object, and removal keys on the STAR id (not the
+component id). Duplicate stars are rejected with a 409 ``already_starred``.
+
 Endpoints:
-    GET    /v1/projects/{pid}/starred-components
-    POST   /v1/projects/{pid}/starred-components
-    DELETE /v1/projects/{pid}/starred-components/{cid}
+    GET    /v1/starred_components
+    POST   /v1/starred_components
+    DELETE /v1/starred_components/{star_id}
 """
 
 from __future__ import annotations
@@ -15,43 +19,77 @@ from thrustlab.resources._base import Resource
 
 
 class StarredComponentsResource(Resource):
-    def list(self, project_id: str) -> CursorPager[dict[str, Any]]:
-        """List starred components for a project (cursor-paginated).
+    def list(
+        self,
+        *,
+        project_id: Optional[str] = None,
+        component_type: Optional[str] = None,
+        limit: int = 25,
+        cursor: Optional[str] = None,
+    ) -> CursorPager[dict[str, Any]]:
+        """List the caller's stars, newest first (cursor-paginated).
 
-        Returns a :class:`CursorPager` that lazily fetches subsequent pages.
+        Args:
+            project_id: Optional filter — only stars in this project.
+            component_type: Optional filter — ``motor`` / ``battery`` /
+                ``propeller``.
+            cursor: Opaque pagination token from a prior response's
+                ``next_cursor``.
+
+        Each row carries its own ``star_<ksuid>`` ``id`` plus ``project_id``,
+        ``component_id``, ``component_type``, and ``created_at``.
         """
+        params: dict[str, Any] = {"limit": limit}
+        if project_id:
+            params["project"] = project_id
+        if component_type:
+            params["component_type"] = component_type
+        if cursor:
+            params["cursor"] = cursor
         return CursorPager(
             fetch_page=lambda p: self._transport.request(
-                "GET", f"/v1/projects/{project_id}/starred-components", params=p
+                "GET", "/v1/starred_components", params=p
             ),
-            initial_params={},
+            initial_params=params,
         )
 
     def add(
         self,
+        *,
         project_id: str,
         component_id: str,
-        *,
+        component_type: str,
         idempotency_key: Optional[str] = None,
     ) -> dict[str, Any]:
-        """Star a component in the given project."""
+        """Star a component in the given project.
+
+        ``component_type`` is required (``motor`` / ``battery`` /
+        ``propeller``). Raises ``ConflictError`` (409 ``already_starred``)
+        if the (project, component) pair is already starred — starring is
+        NOT idempotent.
+        """
         return self._transport.request(
             "POST",
-            f"/v1/projects/{project_id}/starred-components",
-            json={"component_id": component_id},
+            "/v1/starred_components",
+            json={
+                "project_id": project_id,
+                "component_id": component_id,
+                "component_type": component_type,
+            },
             idempotency_key=idempotency_key,
         )
 
     def remove(
         self,
-        project_id: str,
-        component_id: str,
+        star_id: str,
         *,
         idempotency_key: Optional[str] = None,
     ) -> None:
-        """Unstar a component from the given project."""
+        """Remove a star by its own ``star_<ksuid>`` id (from ``list()`` or
+        the ``add()`` response). Unknown ids raise ``NotFoundError`` — removal
+        is NOT idempotent."""
         self._transport.request(
             "DELETE",
-            f"/v1/projects/{project_id}/starred-components/{component_id}",
+            f"/v1/starred_components/{star_id}",
             idempotency_key=idempotency_key,
         )

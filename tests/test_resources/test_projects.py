@@ -10,10 +10,12 @@ def test_list_passes_params(mock_router, monkeypatch):
     route = mock_router.get("/v1/projects").mock(
         return_value=Response(200, json={"data": [], "has_more": False})
     )
-    client.projects.list(limit=10, starting_after="proj_5").data  # trigger fetch
+    client.projects.list(limit=10, cursor="proj_5").data  # trigger fetch
     qs = dict(route.calls[0].request.url.params)
     assert qs["limit"] == "10"
-    assert qs["starting_after"] == "proj_5"
+    # The endpoint reads `cursor` — the pre-0.3.2 `starting_after` was ignored.
+    assert qs["cursor"] == "proj_5"
+    assert "starting_after" not in qs
 
 
 def test_create_calls_post(mock_router, monkeypatch):

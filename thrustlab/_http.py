@@ -119,14 +119,15 @@ class Transport:
                 return None
             return resp.json()
 
-        # Error path. Parse envelope: { "error": { "type": ..., "code": ..., "message": ..., "param": ... } }.
-        request_id = resp.headers.get("X-Request-ID")
+        # Error path. Parse envelope: { "error": { "type": ..., "code": ..., "message": ..., "param": ..., "request_id": ... } }.
         body: dict[str, Any] = {}
         try:
             body = resp.json()
         except ValueError:
             pass
         env = body.get("error", {}) if isinstance(body, dict) else {}
+        # The envelope's request_id is authoritative; the header is a fallback.
+        request_id = env.get("request_id") or resp.headers.get("X-Request-ID")
 
         kwargs = dict(
             code=env.get("code"),

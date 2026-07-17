@@ -13,7 +13,10 @@ def test_list_passes_project_filter(mock_router, monkeypatch):
     )
     client.simulations.list(project_id="proj_1", limit=5).data  # trigger fetch
     qs = dict(route.calls[0].request.url.params)
-    assert qs["project_id"] == "proj_1"
+    # The endpoint's filter param is `project` — the pre-0.3.2 `project_id`
+    # key was silently ignored server-side (filter did nothing).
+    assert qs["project"] == "proj_1"
+    assert "project_id" not in qs
     assert qs["limit"] == "5"
 
 

@@ -17,16 +17,21 @@ from thrustlab.resources._base import Resource
 
 
 class ProjectsResource(Resource):
-    def list(self, *, limit: int = 20, starting_after: Optional[str] = None) -> CursorPager[dict[str, Any]]:
+    def list(self, *, limit: int = 20, cursor: Optional[str] = None) -> CursorPager[dict[str, Any]]:
         """List projects (cursor-paginated).
+
+        Args:
+            cursor: Opaque pagination token from a prior response's
+                ``next_cursor`` (the backend reads ``cursor``; the pre-0.3.2
+                ``starting_after`` kwarg was silently ignored server-side).
 
         Returns a :class:`CursorPager` that lazily fetches subsequent pages.
         Iterate to consume all pages, or access ``.data`` / ``.has_more`` for
         manual cursor control.
         """
         params: dict[str, Any] = {"limit": limit}
-        if starting_after:
-            params["starting_after"] = starting_after
+        if cursor:
+            params["cursor"] = cursor
         return CursorPager(
             fetch_page=lambda p: self._transport.request("GET", "/v1/projects", params=p),
             initial_params=params,

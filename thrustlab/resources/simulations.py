@@ -21,12 +21,18 @@ class SimulationsResource(Resource):
         self,
         *,
         project_id: Optional[str] = None,
+        status: Optional[str] = None,
         limit: int = 20,
         cursor: Optional[str] = None,
     ) -> CursorPager[dict[str, Any]]:
         """List simulations (cursor-paginated).
 
         Args:
+            project_id: Optional project filter (sent as the endpoint's
+                ``project`` query param; pre-0.3.2 the SDK sent an ignored
+                ``project_id`` key, so this filter silently did nothing).
+            status: Optional status filter (``queued`` / ``running`` /
+                ``completed`` / ``failed`` / ``canceled``).
             cursor: Opaque pagination token from a prior response's
                 ``next_cursor`` (the ``/v1/simulations`` endpoint reads
                 ``cursor``). Omit to start from the first page.
@@ -35,7 +41,9 @@ class SimulationsResource(Resource):
         """
         params: dict[str, Any] = {"limit": limit}
         if project_id:
-            params["project_id"] = project_id
+            params["project"] = project_id
+        if status:
+            params["status"] = status
         if cursor:
             params["cursor"] = cursor
         return CursorPager(

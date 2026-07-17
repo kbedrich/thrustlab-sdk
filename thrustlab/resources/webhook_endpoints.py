@@ -22,14 +22,19 @@ from thrustlab.resources._base import Resource
 
 
 class WebhookEndpointsResource(Resource):
-    def list(self, *, limit: int = 20, starting_after: Optional[str] = None) -> CursorPager[dict[str, Any]]:
+    def list(self, *, limit: int = 20, cursor: Optional[str] = None) -> CursorPager[dict[str, Any]]:
         """List webhook endpoints (cursor-paginated).
+
+        Args:
+            cursor: Opaque pagination token from a prior response's
+                ``next_cursor`` (the backend reads ``cursor``; the pre-0.3.2
+                ``starting_after`` kwarg was silently ignored server-side).
 
         Returns a :class:`CursorPager` that lazily fetches subsequent pages.
         """
         params: dict[str, Any] = {"limit": limit}
-        if starting_after:
-            params["starting_after"] = starting_after
+        if cursor:
+            params["cursor"] = cursor
         return CursorPager(
             fetch_page=lambda p: self._transport.request("GET", "/v1/webhook_endpoints", params=p),
             initial_params=params,
@@ -86,14 +91,18 @@ class WebhookEndpointsResource(Resource):
             idempotency_key=idempotency_key,
         )
 
-    def list_events(self, *, limit: int = 20, starting_after: Optional[str] = None) -> CursorPager[dict[str, Any]]:
-        """List all event types (cursor-paginated).
+    def list_events(self, *, limit: int = 20, cursor: Optional[str] = None) -> CursorPager[dict[str, Any]]:
+        """List the account's event OCCURRENCE log (cursor-paginated).
+
+        Each item is an emitted event instance — ``{id, object, type,
+        created_at, api_version, data}`` — not a catalog of available event
+        type names (that list lives in the docs).
 
         Returns a :class:`CursorPager` that lazily fetches subsequent pages.
         """
         params: dict[str, Any] = {"limit": limit}
-        if starting_after:
-            params["starting_after"] = starting_after
+        if cursor:
+            params["cursor"] = cursor
         return CursorPager(
             fetch_page=lambda p: self._transport.request("GET", "/v1/events", params=p),
             initial_params=params,
@@ -104,18 +113,34 @@ class WebhookEndpointsResource(Resource):
         endpoint_id: str,
         *,
         status: Optional[str] = None,
+        event_type: Optional[str] = None,
+        created_at_gte: Optional[str] = None,
         limit: int = 20,
-        starting_after: Optional[str] = None,
+        cursor: Optional[str] = None,
     ) -> CursorPager[dict[str, Any]]:
         """List delivery attempts for an endpoint (cursor-paginated).
+
+        Args:
+            status: Optional filter — ``pending`` / ``succeeded`` /
+                ``failed`` / ``permanently_failed``.
+            event_type: Optional filter on the delivered event's type
+                (e.g. ``simulation.completed``).
+            created_at_gte: Optional ISO-8601 lower bound on delivery
+                creation time (sent as ``created_at[gte]``).
+            cursor: Opaque pagination token from a prior response's
+                ``next_cursor``.
 
         Returns a :class:`CursorPager` that lazily fetches subsequent pages.
         """
         params: dict[str, Any] = {"limit": limit}
         if status:
             params["status"] = status
-        if starting_after:
-            params["starting_after"] = starting_after
+        if event_type:
+            params["event_type"] = event_type
+        if created_at_gte:
+            params["created_at[gte]"] = created_at_gte
+        if cursor:
+            params["cursor"] = cursor
         return CursorPager(
             fetch_page=lambda p: self._transport.request(
                 "GET", f"/v1/webhook_endpoints/{endpoint_id}/deliveries", params=p

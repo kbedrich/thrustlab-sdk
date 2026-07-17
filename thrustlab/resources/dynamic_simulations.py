@@ -44,7 +44,9 @@ class DynamicSimulationsResource(Resource):
         """
         params: dict[str, Any] = {"limit": limit}
         if project_id:
-            params["project_id"] = project_id
+            # The endpoint's filter param is ``project`` (pre-0.3.2 the SDK
+            # sent an ignored ``project_id`` key — the filter did nothing).
+            params["project"] = project_id
         if cursor:
             params["cursor"] = cursor
         return CursorPager(

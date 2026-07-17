@@ -17,7 +17,7 @@ T = TypeVar("T", bound="SweepPointResource")
 class SweepPointResource:
     """A single sweep grid point.
 
-    ``rotors`` is the full per-point solver result dict — keyed per-rotor
+    ``rotors`` is the full per-point PROM result dict — keyed per-rotor
     ("1", "2"...) plus the "All"/"Battery" aggregates — mirroring
     ``SimulationResource.result``. Each per-rotor entry follows the canonical
     snake_case ``SimulationResultV1`` shape (wired at read time in a later

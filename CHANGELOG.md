@@ -8,6 +8,51 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-16
+
+Bug-fix release: a docs-vs-code audit found several SDK surfaces that
+silently did nothing (the server ignores unknown query params) or targeted
+endpoints that don't exist. No new API surface beyond the fixes below.
+
+### Fixed
+
+- **`list(project_id=...)` on `simulations`, `sweeps`, and
+  `dynamic_simulations` now actually filters.** The SDK sent a `project_id`
+  query key but the endpoints read `project` — the filter was silently
+  ignored and every listing returned ALL of the caller's runs. The kwarg
+  name is unchanged; the SDK now sends the right param.
+- **`projects.list`, `submissions.list`, `webhook_endpoints.list`,
+  `list_events`, and `list_deliveries` pagination kwarg renamed
+  `starting_after=` → `cursor=`.** The endpoints read `cursor`;
+  `starting_after` was silently ignored (same defect the 0.3.0 changelog
+  fixed for sims/sweeps — these five were missed).
+- **BREAKING — `client.starred_components` rewritten against the real API.**
+  The previous resource targeted `GET/POST /v1/projects/{pid}/starred-components`,
+  which does not exist under `/v1/` — every call 404'd. Stars are flat,
+  first-class resources:
+  - `list(project_id=..., component_type=..., cursor=...)` →
+    `GET /v1/starred_components`;
+  - `add(project_id=..., component_id=..., component_type=...)` →
+    `POST /v1/starred_components` (component_type is required; duplicate
+    star raises `ConflictError` 409 `already_starred`);
+  - `remove(star_id)` → `DELETE /v1/starred_components/{star_id}` — keys on
+    the star's own `star_<ksuid>` id (from `list()`/`add()`), not the
+    component id.
+- **`APIError.request_id` is now populated.** It is read from the error
+  envelope's `request_id` (with the `X-Request-ID` response header as a
+  fallback); previously the SDK only read the header, which the server did
+  not send, so `request_id` was always `None`.
+
+### Added
+
+- `simulations.list(status=...)` — filter by `queued` / `running` /
+  `completed` / `failed` / `canceled`.
+- `submissions.list(status=...)` — filter by moderation status.
+- `submissions.update(id, ...)` / `submissions.withdraw(id)` — edit or
+  withdraw a submission while it is still `submitted`.
+- `webhook_endpoints.list_deliveries(..., event_type=..., created_at_gte=...)`
+  — the endpoint's remaining filters, previously unreachable from the SDK.
+
 ## [0.3.1] - 2026-07-16
 
 Packaging-metadata fix, no code changes:

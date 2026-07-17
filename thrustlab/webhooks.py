@@ -1,7 +1,7 @@
 """Webhook signature verification + Event parsing.
 
 Mirrors the live webhook-delivery service's HMAC scheme. The server-side
-implementation is in ``the ThrustLab webhook service``.
+implementation is in ``backend/app/services/webhooks.py``.
 
 Signing scheme (as of 2026-04-25):
   Header name:  ``Thrustlab-Signature``

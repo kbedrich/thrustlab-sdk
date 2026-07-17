@@ -5,8 +5,9 @@ Run it:
     python examples/dynamic/run_and_poll.py
 
 A dynamic run integrates the powertrain through a throttle/airspeed *schedule*
-until a *termination* condition (here: full-throttle hover until the pack SOC
-falls to 20%). It returns per-step `samples` (each a full steady-shaped result),
+until a *termination* condition (here: a 2 s spin-up ramp, then a 20 s hover
+at 70% — a fixed-duration mission). It returns per-step `samples` (each a full
+steady-shaped result),
 time `series`, a `scorecard`, and `events`. Swap in your own component IDs, or
 resolve them by name with client.components.find(...).
 """
@@ -36,19 +37,28 @@ dyn = client.dynamic_simulations.create(
             "propeller_component_id": prop["id"],
         }
     ],
-    # One segment: hold 70% throttle, static, run until the pack depletes.
+    # Ramp to 70% over 2 s, then hold for 20 s. The soft-start matters:
+    # stepping 70% onto a stationary rotor draws an in-rush that can sag the
+    # pack below the low-voltage cutoff and end the run immediately — exactly
+    # as it would on real hardware. Endurance ("until depleted") missions work
+    # the same way but integrate minutes of pack time; keep examples short.
     schedule={
         "mode": "segments",
         "segments": [
             {
-                "until_depleted": True,
+                "duration_s": 2.0,
+                "airspeed_target": 0.0,
+                "per_group": {"main": {"throttle_target": 70, "throttle_ramp": "linear"}},
+            },
+            {
+                "duration_s": 20.0,
                 "airspeed_target": 0.0,
                 "per_group": {"main": {"throttle_target": 70}},
-            }
+            },
         ],
     },
-    # Stop when the worst cell reaches 20% SOC.
-    termination={"mode": "until_depleted", "soc_cutoff_pct": 20.0},
+    # Fixed-duration mission: run the schedule to its end.
+    termination={"mode": "fixed"},
 )
 print(f"created {dyn['id']}, status={dyn['status']}")
 
