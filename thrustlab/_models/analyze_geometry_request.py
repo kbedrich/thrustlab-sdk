@@ -36,7 +36,9 @@ class AnalyzeGeometryRequest:
             mode (AnalyzeGeometryRequestMode | Unset):  Default: AnalyzeGeometryRequestMode.POINT.
             num_blades (int | Unset):  Default: 2.
             rpm (float | Unset):  Default: 5000.0.
-            section_airfoils (list[Any] | Unset): [[lower_w, upper_w], ...] Kulfan pairs per station
+            section_airfoils (list[Any] | Unset): Per-station Kulfan CST sections: {lower_weights, upper_weights,
+                leading_edge_weight, TE_thickness} per station. The legacy [lower_w, upper_w] pair form is still accepted on
+                read.
             sweep (list[float] | None | Unset):
             target_type (AnalyzeGeometryRequestTargetTypeType0 | None | Unset):
             target_value (float | None | Unset):

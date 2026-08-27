@@ -8,6 +8,106 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-27
+
+Contract refresh for the production `/v1/` API. This release adds the current
+multi-rotor, battery-topology, geometry, entitlement, and native Rust solver
+response models. It also removes generated models for an endpoint that is not
+part of the public API.
+
+### Breaking
+
+- Paid accounts now represent unlimited monthly simulation usage explicitly:
+  `CreditBalanceResource.total` and `CreditUsageEventResource.balance_after`
+  may be `None`, and `CreditBalanceResource.unlimited` states whether the
+  account has no monthly usage allowance. Concurrency and HTTP rate limits are
+  still enforced separately.
+- Removed `PreviewRequest` and `GeometryPreviewResponse`. The corresponding
+  `/v1/geometry/preview` operation was not a public live endpoint; use
+  `client.geometry.generate(...)` or `client.geometry.analyze(...)` instead.
+- The generated sweep-point payload is now typed as `SweepPointInputs` with a
+  nested `SweepPointComponentSelection`, replacing the unstructured
+  `SweepPointResourceInputs` model.
+- Generated dynamic schedule enum names now include the nullable-union suffix:
+  `SegmentGroupCommandInThrottleRampType0` and
+  `SegmentGroupCommandInTiltRampType0` replace their unsuffixed counterparts.
+
+### Added
+
+- Single-point, sweep, and dynamic requests accept an ordered `rotors` list.
+  Each rotor can carry its rotation sense and coaxial stack/position metadata;
+  legacy grouped inputs remain accepted for compatibility. Rotor-group counts
+  now support up to 40 rotors.
+- Structured `PackTopologyIn` battery definitions with series, parallel, and
+  leaf nodes. Simulation and dynamic resources return the stored topology.
+- Simulation, sweep, and dynamic resources expose `solver_engine`; dynamic
+  resources also expose `snapshot_version`.
+- Dynamic rotor groups expose the full ESC contract: type, timing, PWM
+  frequency, resistance, motor-wire resistance, and synchronous rectification.
+- Geometry design/generation accepts explicit radial station arrays, hub ratio,
+  airfoil layout, and one to 16 blades. Analysis responses expose validation
+  envelope status/limiting factor and `Ct_raw`, `Cp_raw`, `thrust_raw`,
+  `torque_raw`, and `power_raw`.
+- Entitlements expose `max_concurrent_runs` and `fmi_export`. User resources
+  expose first/last name and required-tier gate metadata.
+
+### Changed
+
+- The published contract and generated models now identify native Rust solver
+  results via the `solver_engine` response field (`prom-rs/0.2.1` in this
+  release).
+- Hobbyist and Pro usage is unlimited. `max_concurrent_runs` communicates the
+  account-wide queue width (one for Hobbyist and five for Pro); request rate
+  limiting remains independent of simulation concurrency.
+- **Physical inputs that were silently accepted out of range are now rejected
+  with a `422` naming the field.** The intervals below were already enforced one
+  layer inside the API, but they were absent from the request schema — so a
+  request carrying one of these values either returned an unhelpful `500` or, for
+  the pinned motor temperatures, was accepted and run. Nothing in range changes:
+  every previously-valid request is still valid and returns the same numbers.
+
+  | Field | Accepted range |
+  | --- | --- |
+  | `density_kg_m3` (simulation, sweep, dynamic, dynamic estimate) | `0 < x <= 2.0` kg/m³ |
+  | `airspeed_m_s` (simulation, sweep) | `0 – 100` m/s |
+  | `airspeed_target` (dynamic schedule segment and CSV row) | `0 – 100` m/s |
+  | `throttle_pct` (rotor group) | `0 – 100` % |
+  | `esc_resistance_mohm`, `esc_motor_wire_resistance_mohm` (rotor group) | `0 – 10000` mΩ |
+  | `battery_esc_wire_resistance_mohm` (simulation, sweep) | `0 – 10000` mΩ |
+  | `motor_t_w`, `motor_t_mag` (rotor group) | `-60 – 250` °C |
+
+  The motor-temperature pins are the ones worth checking in existing code: they
+  are **degrees Celsius**, and a value in kelvin (e.g. `293.15`) used to be
+  accepted and quietly changed the winding resistance and torque constant. It is
+  now a `422`.
+
+  Every one of these bounds also appears in the OpenAPI spec now, so a
+  spec-generated client can see them.
+
+- **`esc_type` now defaults to `six_step` instead of `foc`** on `RotorGroupIn`
+  and `SweepRotorGroupIn` (ESC-7). This is a BEHAVIOUR change for any caller that
+  omits the field: `esc_type` selects the commutation convention — K_volt
+  (1/sqrt(3) vs sqrt(3)/pi), copper and iron multipliers, the six-step advance
+  physics, and the throttle→duty map. Measured on a 400 kV / 14-pole / 50 mOhm
+  motor at 22.2 V: RPM −4.56% at full throttle (−2.56% at 75%, −2.84% at 50%,
+  −3.71% at 25%), thrust −8.91% at full throttle to −5.06% at 75%.
+
+  Why: the API defaulted to `foc` while the web app has always sent `six_step`,
+  so the same powertrain returned different numbers depending on which surface
+  submitted it. Six-step is the researched default — catalog Kv is measured under
+  trapezoidal drive and real hobby ESCs are 120° block commutation — so aligning
+  the API to it makes the two agree without moving the web app.
+
+  **To keep the previous behaviour, send `esc_type="foc"` explicitly.** Stored
+  simulations are unaffected: the column default changed with no backfill, so a
+  run recorded as FOC still re-runs as FOC.
+
+### Fixed
+
+- The source archive now uses an explicit public-package manifest, excluding
+  monorepo-only release tooling while retaining the SDK, tests, examples,
+  changelog, and legal files.
+
 ## [0.3.2] - 2026-07-16
 
 Bug-fix release: a docs-vs-code audit found several SDK surfaces that

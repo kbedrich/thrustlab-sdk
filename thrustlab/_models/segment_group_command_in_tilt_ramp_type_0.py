@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SegmentGroupCommandInThrottleRamp(str, Enum):
+class SegmentGroupCommandInTiltRampType0(str, Enum):
     LINEAR = "linear"
     STEP = "step"
 

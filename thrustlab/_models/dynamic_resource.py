@@ -9,6 +9,7 @@ from thrustlab._models.dynamic_resource_status import DynamicResourceStatus
 from thrustlab._models.types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from thrustlab._models.dynamic_resource_battery_topology_type_0 import DynamicResourceBatteryTopologyType0
     from thrustlab._models.dynamic_resource_display_labels_type_0 import DynamicResourceDisplayLabelsType0
     from thrustlab._models.dynamic_resource_error_type_0 import DynamicResourceErrorType0
     from thrustlab._models.dynamic_resource_input_snapshot_type_0 import DynamicResourceInputSnapshotType0
@@ -29,6 +30,7 @@ class DynamicResource:
             id (str):
             project_id (str):
             status (DynamicResourceStatus):
+            battery_topology (DynamicResourceBatteryTopologyType0 | None | Unset):
             created_at (None | str | Unset):
             dispatched_at (None | str | Unset):
             display_labels (DynamicResourceDisplayLabelsType0 | None | Unset):
@@ -38,12 +40,15 @@ class DynamicResource:
             name (None | str | Unset):
             object_ (Literal['dynamic_simulation'] | Unset):  Default: 'dynamic_simulation'.
             result (DynamicResourceResultType0 | None | Unset):
+            snapshot_version (int | Unset):  Default: 2.
+            solver_engine (str | Unset):  Default: 'prom-rs/0.2.1'.
     """
 
     credits_cost: int
     id: str
     project_id: str
     status: DynamicResourceStatus
+    battery_topology: DynamicResourceBatteryTopologyType0 | None | Unset = UNSET
     created_at: None | str | Unset = UNSET
     dispatched_at: None | str | Unset = UNSET
     display_labels: DynamicResourceDisplayLabelsType0 | None | Unset = UNSET
@@ -53,8 +58,11 @@ class DynamicResource:
     name: None | str | Unset = UNSET
     object_: Literal["dynamic_simulation"] | Unset = "dynamic_simulation"
     result: DynamicResourceResultType0 | None | Unset = UNSET
+    snapshot_version: int | Unset = 2
+    solver_engine: str | Unset = "prom-rs/0.2.1"
 
     def to_dict(self) -> dict[str, Any]:
+        from thrustlab._models.dynamic_resource_battery_topology_type_0 import DynamicResourceBatteryTopologyType0
         from thrustlab._models.dynamic_resource_display_labels_type_0 import DynamicResourceDisplayLabelsType0
         from thrustlab._models.dynamic_resource_error_type_0 import DynamicResourceErrorType0
         from thrustlab._models.dynamic_resource_input_snapshot_type_0 import DynamicResourceInputSnapshotType0
@@ -67,6 +75,14 @@ class DynamicResource:
         project_id = self.project_id
 
         status = self.status.value
+
+        battery_topology: dict[str, Any] | None | Unset
+        if isinstance(self.battery_topology, Unset):
+            battery_topology = UNSET
+        elif isinstance(self.battery_topology, DynamicResourceBatteryTopologyType0):
+            battery_topology = self.battery_topology.to_dict()
+        else:
+            battery_topology = self.battery_topology
 
         created_at: None | str | Unset
         if isinstance(self.created_at, Unset):
@@ -122,6 +138,10 @@ class DynamicResource:
         else:
             result = self.result
 
+        snapshot_version = self.snapshot_version
+
+        solver_engine = self.solver_engine
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -132,6 +152,8 @@ class DynamicResource:
                 "status": status,
             }
         )
+        if battery_topology is not UNSET:
+            field_dict["battery_topology"] = battery_topology
         if created_at is not UNSET:
             field_dict["created_at"] = created_at
         if dispatched_at is not UNSET:
@@ -150,11 +172,16 @@ class DynamicResource:
             field_dict["object"] = object_
         if result is not UNSET:
             field_dict["result"] = result
+        if snapshot_version is not UNSET:
+            field_dict["snapshot_version"] = snapshot_version
+        if solver_engine is not UNSET:
+            field_dict["solver_engine"] = solver_engine
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from thrustlab._models.dynamic_resource_battery_topology_type_0 import DynamicResourceBatteryTopologyType0
         from thrustlab._models.dynamic_resource_display_labels_type_0 import DynamicResourceDisplayLabelsType0
         from thrustlab._models.dynamic_resource_error_type_0 import DynamicResourceErrorType0
         from thrustlab._models.dynamic_resource_input_snapshot_type_0 import DynamicResourceInputSnapshotType0
@@ -168,6 +195,23 @@ class DynamicResource:
         project_id = d.pop("project_id")
 
         status = DynamicResourceStatus(d.pop("status"))
+
+        def _parse_battery_topology(data: object) -> DynamicResourceBatteryTopologyType0 | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                battery_topology_type_0 = DynamicResourceBatteryTopologyType0.from_dict(data)
+
+                return battery_topology_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(DynamicResourceBatteryTopologyType0 | None | Unset, data)
+
+        battery_topology = _parse_battery_topology(d.pop("battery_topology", UNSET))
 
         def _parse_created_at(data: object) -> None | str | Unset:
             if data is None:
@@ -270,11 +314,16 @@ class DynamicResource:
 
         result = _parse_result(d.pop("result", UNSET))
 
+        snapshot_version = d.pop("snapshot_version", UNSET)
+
+        solver_engine = d.pop("solver_engine", UNSET)
+
         dynamic_resource = cls(
             credits_cost=credits_cost,
             id=id,
             project_id=project_id,
             status=status,
+            battery_topology=battery_topology,
             created_at=created_at,
             dispatched_at=dispatched_at,
             display_labels=display_labels,
@@ -284,6 +333,8 @@ class DynamicResource:
             name=name,
             object_=object_,
             result=result,
+            snapshot_version=snapshot_version,
+            solver_engine=solver_engine,
         )
 
         return dynamic_resource

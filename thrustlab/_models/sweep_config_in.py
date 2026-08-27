@@ -20,7 +20,9 @@ T = TypeVar("T", bound="SweepConfigIn")
 class SweepConfigIn:
     """
     Attributes:
-        rotor_sweep_mask (list[bool]):
+        rotor_sweep_mask (list[bool]): One bool per rotor group, same order as `rotor_groups`: true = this group follows
+            the swept throttle axis. INERT when `sweep.throttle` is absent — with no throttle axis there is nothing to
+            follow, and every group keeps its own persisted throttle. Length must equal `rotor_groups` (422 otherwise).
         airspeed (None | SweepParamRangeIn | Unset):
         battery_charge (None | SweepParamRangeIn | Unset):
         component_axes (list[ComponentSweepAxisIn] | Unset):
@@ -29,7 +31,9 @@ class SweepConfigIn:
         esc_timing_values (list[SweepConfigInEscTimingValuesType0Item] | None | Unset):
         throttle (None | SweepParamRangeIn | Unset):
         tilt (None | SweepParamRangeIn | Unset):
-        tilt_sweep_mask (list[bool] | Unset):
+        tilt_sweep_mask (list[bool] | Unset): One bool per rotor group, same order as `rotor_groups`: true = this group
+            sweeps the shared `tilt` angle range as its own grid dimension. Omit or leave empty when no tilt axis is swept.
+            When non-empty its length must equal `rotor_groups` (422 otherwise).
         vertical_speed (None | SweepParamRangeIn | Unset):
     """
 

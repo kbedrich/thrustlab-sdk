@@ -21,7 +21,8 @@ class CreditBalanceResource:
     Attributes:
         as_of (str):
         breakdown (list[CreditBucketBreakdown]):
-        total (int):
+        total (int | None): Remaining Free compute-unit allowance, or null when unlimited is true.
+        unlimited (bool): True for usage-uncapped Hobbyist and Pro accounts.
         currency (Literal['credit'] | Unset):  Default: 'credit'.
         low_balance_threshold (int | None | Unset):
         object_ (Literal['credit_balance'] | Unset):  Default: 'credit_balance'.
@@ -29,7 +30,8 @@ class CreditBalanceResource:
 
     as_of: str
     breakdown: list[CreditBucketBreakdown]
-    total: int
+    total: int | None
+    unlimited: bool
     currency: Literal["credit"] | Unset = "credit"
     low_balance_threshold: int | None | Unset = UNSET
     object_: Literal["credit_balance"] | Unset = "credit_balance"
@@ -43,7 +45,10 @@ class CreditBalanceResource:
             breakdown_item = breakdown_item_data.to_dict()
             breakdown.append(breakdown_item)
 
+        total: int | None
         total = self.total
+
+        unlimited = self.unlimited
 
         currency = self.currency
 
@@ -62,6 +67,7 @@ class CreditBalanceResource:
                 "as_of": as_of,
                 "breakdown": breakdown,
                 "total": total,
+                "unlimited": unlimited,
             }
         )
         if currency is not UNSET:
@@ -87,7 +93,14 @@ class CreditBalanceResource:
 
             breakdown.append(breakdown_item)
 
-        total = d.pop("total")
+        def _parse_total(data: object) -> int | None:
+            if data is None:
+                return data
+            return cast(int | None, data)
+
+        total = _parse_total(d.pop("total"))
+
+        unlimited = d.pop("unlimited")
 
         currency = cast(Literal["credit"] | Unset, d.pop("currency", UNSET))
         if currency != "credit" and not isinstance(currency, Unset):
@@ -110,6 +123,7 @@ class CreditBalanceResource:
             as_of=as_of,
             breakdown=breakdown,
             total=total,
+            unlimited=unlimited,
             currency=currency,
             low_balance_threshold=low_balance_threshold,
             object_=object_,

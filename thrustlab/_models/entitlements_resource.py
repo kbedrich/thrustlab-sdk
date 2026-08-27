@@ -22,10 +22,13 @@ class EntitlementsResource:
             api_access (bool):
             cad_export (bool):
             creator_edit (bool):
-            daily_cap (int | None):
+            daily_cap (int | None): Rolling daily usage cap, or null when no daily cap applies.
             db_access (str):
+            fmi_export (bool):
+            max_concurrent_runs (int): Account-wide simulations that may execute simultaneously across dashboard sessions
+                and every API key. Additional work stays queued.
             sim_types (list[str]):
-            weekly_cap (int | None):
+            weekly_cap (int | None): Compatibility field for a rolling weekly usage cap; null for current tiers.
     """
 
     api_access: bool
@@ -33,6 +36,8 @@ class EntitlementsResource:
     creator_edit: bool
     daily_cap: int | None
     db_access: str
+    fmi_export: bool
+    max_concurrent_runs: int
     sim_types: list[str]
     weekly_cap: int | None
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -49,6 +54,10 @@ class EntitlementsResource:
 
         db_access = self.db_access
 
+        fmi_export = self.fmi_export
+
+        max_concurrent_runs = self.max_concurrent_runs
+
         sim_types = self.sim_types
 
         weekly_cap: int | None
@@ -63,6 +72,8 @@ class EntitlementsResource:
                 "creator_edit": creator_edit,
                 "daily_cap": daily_cap,
                 "db_access": db_access,
+                "fmi_export": fmi_export,
+                "max_concurrent_runs": max_concurrent_runs,
                 "sim_types": sim_types,
                 "weekly_cap": weekly_cap,
             }
@@ -88,6 +99,10 @@ class EntitlementsResource:
 
         db_access = d.pop("db_access")
 
+        fmi_export = d.pop("fmi_export")
+
+        max_concurrent_runs = d.pop("max_concurrent_runs")
+
         sim_types = cast(list[str], d.pop("sim_types"))
 
         def _parse_weekly_cap(data: object) -> int | None:
@@ -103,6 +118,8 @@ class EntitlementsResource:
             creator_edit=creator_edit,
             daily_cap=daily_cap,
             db_access=db_access,
+            fmi_export=fmi_export,
+            max_concurrent_runs=max_concurrent_runs,
             sim_types=sim_types,
             weekly_cap=weekly_cap,
         )

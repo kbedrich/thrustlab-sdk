@@ -13,6 +13,7 @@ from thrustlab._models.types import UNSET, Unset
 
 if TYPE_CHECKING:
     from thrustlab._models.entitlements_resource import EntitlementsResource
+    from thrustlab._models.user_resource_gate_required_tiers import UserResourceGateRequiredTiers
 
 
 T = TypeVar("T", bound="UserResource")
@@ -31,7 +32,10 @@ class UserResource:
             frontend has ONE authoritative entitlement source and never re-hardcodes
             tier sets. A plain declared model (NOT a ``@computed_field``) so it appears
             in the OpenAPI schema that codegen consumes.
+        first_name (str):
+        gate_required_tiers (UserResourceGateRequiredTiers):
         id (str):
+        last_name (str):
         tier (str):
         trial_days_remaining (int | None):
         trial_end (datetime.datetime | None):
@@ -44,7 +48,10 @@ class UserResource:
     email: str
     email_verified: bool
     entitlements: EntitlementsResource
+    first_name: str
+    gate_required_tiers: UserResourceGateRequiredTiers
     id: str
+    last_name: str
     tier: str
     trial_days_remaining: int | None
     trial_end: datetime.datetime | None
@@ -62,7 +69,13 @@ class UserResource:
 
         entitlements = self.entitlements.to_dict()
 
+        first_name = self.first_name
+
+        gate_required_tiers = self.gate_required_tiers.to_dict()
+
         id = self.id
+
+        last_name = self.last_name
 
         tier = self.tier
 
@@ -93,7 +106,10 @@ class UserResource:
                 "email": email,
                 "email_verified": email_verified,
                 "entitlements": entitlements,
+                "first_name": first_name,
+                "gate_required_tiers": gate_required_tiers,
                 "id": id,
+                "last_name": last_name,
                 "tier": tier,
                 "trial_days_remaining": trial_days_remaining,
                 "trial_end": trial_end,
@@ -109,6 +125,7 @@ class UserResource:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from thrustlab._models.entitlements_resource import EntitlementsResource
+        from thrustlab._models.user_resource_gate_required_tiers import UserResourceGateRequiredTiers
 
         d = dict(src_dict)
         created_at = isoparse(d.pop("created_at"))
@@ -119,7 +136,13 @@ class UserResource:
 
         entitlements = EntitlementsResource.from_dict(d.pop("entitlements"))
 
+        first_name = d.pop("first_name")
+
+        gate_required_tiers = UserResourceGateRequiredTiers.from_dict(d.pop("gate_required_tiers"))
+
         id = d.pop("id")
+
+        last_name = d.pop("last_name")
 
         tier = d.pop("tier")
 
@@ -169,7 +192,10 @@ class UserResource:
             email=email,
             email_verified=email_verified,
             entitlements=entitlements,
+            first_name=first_name,
+            gate_required_tiers=gate_required_tiers,
             id=id,
+            last_name=last_name,
             tier=tier,
             trial_days_remaining=trial_days_remaining,
             trial_end=trial_end,

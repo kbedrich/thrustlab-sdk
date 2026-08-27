@@ -5,6 +5,8 @@ from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
+from thrustlab._models.dynamic_rotor_group_in_esc_timing import DynamicRotorGroupInEscTiming
+from thrustlab._models.dynamic_rotor_group_in_esc_type import DynamicRotorGroupInEscType
 from thrustlab._models.dynamic_rotor_group_in_motor_cooling_source import DynamicRotorGroupInMotorCoolingSource
 from thrustlab._models.types import UNSET, Unset
 
@@ -13,17 +15,32 @@ T = TypeVar("T", bound="DynamicRotorGroupIn")
 
 @_attrs_define
 class DynamicRotorGroupIn:
-    """A rotor group for a dynamic run. The dynamic run takes exactly the shared
+    """A rotor group for a dynamic run. Takes exactly the shared
     ``RotorGroupBase`` fields — label / count (bounded 1..16) / motor+propeller ids
-    / the per-group motor-cooling trio + cooling validator — and nothing more: the
-    schedule supplies throttle over time, so there is no static ``throttle_pct``,
-    ESC block, pinned motor temperatures, or oblique flight-condition fields on the
-    dynamic group.
+    / the per-group motor-cooling trio + cooling validator / the ESC block — and
+    nothing more: the schedule supplies throttle over time, so there is no static
+    ``throttle_pct``, no pinned motor temperatures and no oblique
+    flight-condition fields on the dynamic group.
+
+    ESC-8 (2026-08): the ESC block arrived here when it moved down into
+    ``RotorGroupBase``. Before that a dynamic group carried NO ESC fields, so a
+    dynamic run had no escape hatch and the worker fabricated a 10 mOhm ESC with
+    no commutation type. All six fields are defaulted, so every previously-valid
+    body stays valid — this is a pure widening.
 
         Attributes:
             label (str):
             propeller_component_id (str):
             count (int | Unset):  Default: 1.
+            esc_motor_wire_resistance_mohm (float | Unset):  Default: 0.0.
+            esc_pwm_frequency_khz (float | Unset): ESC switching frequency (kHz) Default: 24.0.
+            esc_resistance_mohm (float | Unset):  Default: 0.0.
+            esc_sync_rectification (bool | Unset): Synchronous rectification (comp_pwm); default ON Default: True.
+            esc_timing (DynamicRotorGroupInEscTiming | Unset): Six-step commutation advance preset (low 7.5°/medium 15°/high
+                22.5°/auto duty-scheduled); FOC ignores it Default: DynamicRotorGroupInEscTiming.MEDIUM.
+            esc_type (DynamicRotorGroupInEscType | Unset): ESC commutation type. Selects K_volt, copper_mult, iron_mult, the
+                six-step commutation-advance physics and the throttle->duty map — not a cosmetic flag. Single-sourced (ESC-7):
+                app/constants_esc.py. Default: DynamicRotorGroupInEscType.SIX_STEP.
             motor_component_id (None | str | Unset):
             motor_cooling_source (DynamicRotorGroupInMotorCoolingSource | Unset): Per-rotor-group motor cooling mode.
                 cowling = still air; prop_exit_velocity = forced convection from the prop slipstream (default); custom = fixed
@@ -37,6 +54,12 @@ class DynamicRotorGroupIn:
     label: str
     propeller_component_id: str
     count: int | Unset = 1
+    esc_motor_wire_resistance_mohm: float | Unset = 0.0
+    esc_pwm_frequency_khz: float | Unset = 24.0
+    esc_resistance_mohm: float | Unset = 0.0
+    esc_sync_rectification: bool | Unset = True
+    esc_timing: DynamicRotorGroupInEscTiming | Unset = DynamicRotorGroupInEscTiming.MEDIUM
+    esc_type: DynamicRotorGroupInEscType | Unset = DynamicRotorGroupInEscType.SIX_STEP
     motor_component_id: None | str | Unset = UNSET
     motor_cooling_source: DynamicRotorGroupInMotorCoolingSource | Unset = (
         DynamicRotorGroupInMotorCoolingSource.PROP_EXIT_VELOCITY
@@ -50,6 +73,22 @@ class DynamicRotorGroupIn:
         propeller_component_id = self.propeller_component_id
 
         count = self.count
+
+        esc_motor_wire_resistance_mohm = self.esc_motor_wire_resistance_mohm
+
+        esc_pwm_frequency_khz = self.esc_pwm_frequency_khz
+
+        esc_resistance_mohm = self.esc_resistance_mohm
+
+        esc_sync_rectification = self.esc_sync_rectification
+
+        esc_timing: str | Unset = UNSET
+        if not isinstance(self.esc_timing, Unset):
+            esc_timing = self.esc_timing.value
+
+        esc_type: str | Unset = UNSET
+        if not isinstance(self.esc_type, Unset):
+            esc_type = self.esc_type.value
 
         motor_component_id: None | str | Unset
         if isinstance(self.motor_component_id, Unset):
@@ -83,6 +122,18 @@ class DynamicRotorGroupIn:
         )
         if count is not UNSET:
             field_dict["count"] = count
+        if esc_motor_wire_resistance_mohm is not UNSET:
+            field_dict["esc_motor_wire_resistance_mohm"] = esc_motor_wire_resistance_mohm
+        if esc_pwm_frequency_khz is not UNSET:
+            field_dict["esc_pwm_frequency_khz"] = esc_pwm_frequency_khz
+        if esc_resistance_mohm is not UNSET:
+            field_dict["esc_resistance_mohm"] = esc_resistance_mohm
+        if esc_sync_rectification is not UNSET:
+            field_dict["esc_sync_rectification"] = esc_sync_rectification
+        if esc_timing is not UNSET:
+            field_dict["esc_timing"] = esc_timing
+        if esc_type is not UNSET:
+            field_dict["esc_type"] = esc_type
         if motor_component_id is not UNSET:
             field_dict["motor_component_id"] = motor_component_id
         if motor_cooling_source is not UNSET:
@@ -102,6 +153,28 @@ class DynamicRotorGroupIn:
         propeller_component_id = d.pop("propeller_component_id")
 
         count = d.pop("count", UNSET)
+
+        esc_motor_wire_resistance_mohm = d.pop("esc_motor_wire_resistance_mohm", UNSET)
+
+        esc_pwm_frequency_khz = d.pop("esc_pwm_frequency_khz", UNSET)
+
+        esc_resistance_mohm = d.pop("esc_resistance_mohm", UNSET)
+
+        esc_sync_rectification = d.pop("esc_sync_rectification", UNSET)
+
+        _esc_timing = d.pop("esc_timing", UNSET)
+        esc_timing: DynamicRotorGroupInEscTiming | Unset
+        if isinstance(_esc_timing, Unset):
+            esc_timing = UNSET
+        else:
+            esc_timing = DynamicRotorGroupInEscTiming(_esc_timing)
+
+        _esc_type = d.pop("esc_type", UNSET)
+        esc_type: DynamicRotorGroupInEscType | Unset
+        if isinstance(_esc_type, Unset):
+            esc_type = UNSET
+        else:
+            esc_type = DynamicRotorGroupInEscType(_esc_type)
 
         def _parse_motor_component_id(data: object) -> None | str | Unset:
             if data is None:
@@ -141,6 +214,12 @@ class DynamicRotorGroupIn:
             label=label,
             propeller_component_id=propeller_component_id,
             count=count,
+            esc_motor_wire_resistance_mohm=esc_motor_wire_resistance_mohm,
+            esc_pwm_frequency_khz=esc_pwm_frequency_khz,
+            esc_resistance_mohm=esc_resistance_mohm,
+            esc_sync_rectification=esc_sync_rectification,
+            esc_timing=esc_timing,
+            esc_type=esc_type,
             motor_component_id=motor_component_id,
             motor_cooling_source=motor_cooling_source,
             motor_cooling_velocity_m_s=motor_cooling_velocity_m_s,

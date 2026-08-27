@@ -19,37 +19,59 @@ T = TypeVar("T", bound="RotorGroupIn")
 
 @_attrs_define
 class RotorGroupIn:
-    """
-    Attributes:
-        label (str):
-        propeller_component_id (str):
-        throttle_pct (float):
-        count (int | Unset):  Default: 1.
-        custom_motor (None | Unset | V1CustomComponentOverride):
-        custom_propeller (None | Unset | V1CustomComponentOverride):
-        esc_motor_wire_resistance_mohm (float | Unset):  Default: 0.0.
-        esc_pwm_frequency_khz (float | Unset): ESC switching frequency (kHz) Default: 24.0.
-        esc_resistance_mohm (float | Unset):  Default: 0.0.
-        esc_sync_rectification (bool | Unset): Synchronous rectification (comp_pwm); default ON Default: True.
-        esc_timing (RotorGroupInEscTiming | Unset): Six-step commutation advance preset (low 7.5°/medium 15°/high
-            22.5°/auto duty-scheduled); FOC ignores it Default: RotorGroupInEscTiming.MEDIUM.
-        esc_type (RotorGroupInEscType | Unset): ESC commutation type Default: RotorGroupInEscType.FOC.
-        motor_component_id (None | str | Unset):
-        motor_cooling_source (RotorGroupInMotorCoolingSource | Unset): Per-rotor-group motor cooling mode. cowling =
-            still air; prop_exit_velocity = forced convection from the prop slipstream (default); custom = fixed velocity or
-            direct thermal resistance. Default: RotorGroupInMotorCoolingSource.PROP_EXIT_VELOCITY.
-        motor_cooling_velocity_m_s (float | None | Unset): Custom motor cooling convection velocity (m/s); only used
-            when motor_cooling_source=custom.
-        motor_r_th (float | None | Unset): Custom direct motor thermal resistance override (K/W); only used when
-            motor_cooling_source=custom.
-        motor_t_mag (float | None | Unset): Optional fixed magnet temperature (°C); omit to let the model compute it.
-        motor_t_w (float | None | Unset): Optional fixed winding temperature (°C); omit to let the model compute it.
-        tilt_deg (float | Unset): Ground-mode rotor-axis tilt from vertical (0° = lift/hover, 90° = forward/cruise).
-            Decomposed host-side to (V_axial, V_edge).. Default: 0.0.
-        v_axial_m_s (float | None | Unset): Components-mode signed axial inflow (m/s); only with
-            inflow_mode='components'..
-        v_edge_m_s (float | None | Unset): Components-mode edgewise inflow magnitude (m/s, ≥0); only with
-            inflow_mode='components'..
+    """Single-point rotor GROUP — ``count`` identical rotors.
+
+    Inherits label / count (bounded 1..40) / motor+propeller ids / the
+    motor-cooling trio + cooling validator from ``RotorGroupBase``, and the
+    per-rotor operating point (throttle, pinned motor temperatures, the oblique
+    flight-condition fields, custom component overrides) from
+    ``RotorOperatingFields``.
+
+    The operating-point fields used to be declared HERE. They moved to
+    ``app/v1/_rotor_base.py`` so the flat ``RotorIn`` shape shares one
+    declaration with this one — the same consolidation ESC-8 did for the ESC
+    block. Field definitions, bounds and descriptions are unchanged; only the
+    declaration site moved.
+
+    DEPRECATED in favour of ``rotors[]``. Still accepted and still behaves
+    identically, but cannot describe a coaxial stack — see ``_rotor_base``.
+
+        Attributes:
+            label (str):
+            propeller_component_id (str):
+            throttle_pct (float):
+            count (int | Unset):  Default: 1.
+            custom_motor (None | Unset | V1CustomComponentOverride):
+            custom_propeller (None | Unset | V1CustomComponentOverride):
+            esc_motor_wire_resistance_mohm (float | Unset):  Default: 0.0.
+            esc_pwm_frequency_khz (float | Unset): ESC switching frequency (kHz) Default: 24.0.
+            esc_resistance_mohm (float | Unset):  Default: 0.0.
+            esc_sync_rectification (bool | Unset): Synchronous rectification (comp_pwm); default ON Default: True.
+            esc_timing (RotorGroupInEscTiming | Unset): Six-step commutation advance preset (low 7.5°/medium 15°/high
+                22.5°/auto duty-scheduled); FOC ignores it Default: RotorGroupInEscTiming.MEDIUM.
+            esc_type (RotorGroupInEscType | Unset): ESC commutation type. Selects K_volt, copper_mult, iron_mult, the six-
+                step commutation-advance physics and the throttle->duty map — not a cosmetic flag. Single-sourced (ESC-7):
+                app/constants_esc.py. Default: RotorGroupInEscType.SIX_STEP.
+            motor_component_id (None | str | Unset):
+            motor_cooling_source (RotorGroupInMotorCoolingSource | Unset): Per-rotor-group motor cooling mode. cowling =
+                still air; prop_exit_velocity = forced convection from the prop slipstream (default); custom = fixed velocity or
+                direct thermal resistance. Default: RotorGroupInMotorCoolingSource.PROP_EXIT_VELOCITY.
+            motor_cooling_velocity_m_s (float | None | Unset): Custom motor cooling convection velocity (m/s); only used
+                when motor_cooling_source=custom.
+            motor_r_th (float | None | Unset): Custom direct motor thermal resistance override (K/W); only used when
+                motor_cooling_source=custom.
+            motor_t_mag (float | None | Unset): Optional fixed magnet temperature (°C, -60…250); omit to let the model
+                compute it.
+            motor_t_w (float | None | Unset): Optional fixed winding temperature (°C, -60…250); omit to let the model
+                compute it.
+            tilt_deg (float | Unset): Ground-mode rotor-axis tilt measured from the horizontal-forward (flight) direction
+                (0° = forward/cruise — the axis lies along the flight path and all airspeed becomes axial inflow; 90° =
+                lift/hover — the axis points up and forward airspeed becomes pure edgewise inflow). Decomposed host-side to
+                V_axial = V_h·cosθ + V_v·sinθ, V_edge = |V_v·cosθ − V_h·sinθ|. Default: 0.0.
+            v_axial_m_s (float | None | Unset): Components-mode signed axial inflow (m/s); only with
+                inflow_mode='components'.
+            v_edge_m_s (float | None | Unset): Components-mode edgewise inflow magnitude (m/s, ≥0); only with
+                inflow_mode='components'.
     """
 
     label: str
@@ -63,7 +85,7 @@ class RotorGroupIn:
     esc_resistance_mohm: float | Unset = 0.0
     esc_sync_rectification: bool | Unset = True
     esc_timing: RotorGroupInEscTiming | Unset = RotorGroupInEscTiming.MEDIUM
-    esc_type: RotorGroupInEscType | Unset = RotorGroupInEscType.FOC
+    esc_type: RotorGroupInEscType | Unset = RotorGroupInEscType.SIX_STEP
     motor_component_id: None | str | Unset = UNSET
     motor_cooling_source: RotorGroupInMotorCoolingSource | Unset = RotorGroupInMotorCoolingSource.PROP_EXIT_VELOCITY
     motor_cooling_velocity_m_s: float | None | Unset = UNSET

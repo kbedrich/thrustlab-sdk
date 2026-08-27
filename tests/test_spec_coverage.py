@@ -39,7 +39,6 @@ SKIP_LIST = {
     "stream_design_v1_geometry_design__job_id__stream_get",
     "export_geometry_v1_geometry_export_post",
     "generate_geometry_v1_geometry_generate_post",
-    "generate_preview_v1_geometry_preview_post",
     "list_geometry_styles_v1_geometry_styles_get",
     "get_geometry_style_v1_geometry_styles__slug__get",
     # Airfoil catalog management sits outside the sim SDK surface.

@@ -1,6 +1,6 @@
 """Tests for Webhook.verify + SignatureVerificationError.
 
-Signing scheme matches backend/app/services/webhooks.py exactly:
+Signing scheme matches the ThrustLab webhook service exactly:
   signed_blob = f"{ts}.{body_utf8}".encode("utf-8")
   sig_hex     = hmac.new(secret.encode(), signed_blob, hashlib.sha256).hexdigest()
   header      = f"t={ts},v1={sig_hex}"

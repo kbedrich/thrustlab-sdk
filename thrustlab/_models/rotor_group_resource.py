@@ -23,9 +23,12 @@ class RotorGroupResource:
         motor_component_id (None | str):
         propeller_component_id (str):
         throttle_pct (float):
+        coax_position_m (float | Unset):  Default: 0.0.
+        coax_stack_id (int | Unset):  Default: 0.
         esc_pwm_frequency_khz (float | Unset):  Default: 24.0.
         esc_sync_rectification (bool | Unset):  Default: True.
         esc_timing (str | Unset):  Default: 'medium'.
+        rotation_sense (int | Unset):  Default: 1.
     """
 
     count: int
@@ -36,9 +39,12 @@ class RotorGroupResource:
     motor_component_id: None | str
     propeller_component_id: str
     throttle_pct: float
+    coax_position_m: float | Unset = 0.0
+    coax_stack_id: int | Unset = 0
     esc_pwm_frequency_khz: float | Unset = 24.0
     esc_sync_rectification: bool | Unset = True
     esc_timing: str | Unset = "medium"
+    rotation_sense: int | Unset = 1
 
     def to_dict(self) -> dict[str, Any]:
         count = self.count
@@ -58,11 +64,17 @@ class RotorGroupResource:
 
         throttle_pct = self.throttle_pct
 
+        coax_position_m = self.coax_position_m
+
+        coax_stack_id = self.coax_stack_id
+
         esc_pwm_frequency_khz = self.esc_pwm_frequency_khz
 
         esc_sync_rectification = self.esc_sync_rectification
 
         esc_timing = self.esc_timing
+
+        rotation_sense = self.rotation_sense
 
         field_dict: dict[str, Any] = {}
 
@@ -78,12 +90,18 @@ class RotorGroupResource:
                 "throttle_pct": throttle_pct,
             }
         )
+        if coax_position_m is not UNSET:
+            field_dict["coax_position_m"] = coax_position_m
+        if coax_stack_id is not UNSET:
+            field_dict["coax_stack_id"] = coax_stack_id
         if esc_pwm_frequency_khz is not UNSET:
             field_dict["esc_pwm_frequency_khz"] = esc_pwm_frequency_khz
         if esc_sync_rectification is not UNSET:
             field_dict["esc_sync_rectification"] = esc_sync_rectification
         if esc_timing is not UNSET:
             field_dict["esc_timing"] = esc_timing
+        if rotation_sense is not UNSET:
+            field_dict["rotation_sense"] = rotation_sense
 
         return field_dict
 
@@ -111,11 +129,17 @@ class RotorGroupResource:
 
         throttle_pct = d.pop("throttle_pct")
 
+        coax_position_m = d.pop("coax_position_m", UNSET)
+
+        coax_stack_id = d.pop("coax_stack_id", UNSET)
+
         esc_pwm_frequency_khz = d.pop("esc_pwm_frequency_khz", UNSET)
 
         esc_sync_rectification = d.pop("esc_sync_rectification", UNSET)
 
         esc_timing = d.pop("esc_timing", UNSET)
+
+        rotation_sense = d.pop("rotation_sense", UNSET)
 
         rotor_group_resource = cls(
             count=count,
@@ -126,9 +150,12 @@ class RotorGroupResource:
             motor_component_id=motor_component_id,
             propeller_component_id=propeller_component_id,
             throttle_pct=throttle_pct,
+            coax_position_m=coax_position_m,
+            coax_stack_id=coax_stack_id,
             esc_pwm_frequency_khz=esc_pwm_frequency_khz,
             esc_sync_rectification=esc_sync_rectification,
             esc_timing=esc_timing,
+            rotation_sense=rotation_sense,
         )
 
         return rotor_group_resource
