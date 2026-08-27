@@ -22,7 +22,7 @@ class SweepRotorGroupIn:
     """A sweep rotor group carries the SAME field set as the single-point
     ``RotorGroupIn`` — the sweep AXES live on ``SweepConfigIn`` (the body), not on
     the group. Inheriting ``RotorGroupIn`` fixes the historical bug where the sweep
-    group's ``count`` was UNBOUNDED (it now inherits the bounded ``1..16`` count and
+    group's ``count`` was UNBOUNDED (it now inherits the bounded ``1..40`` count and
     the shared cooling validator).
 
         Attributes:
@@ -38,7 +38,9 @@ class SweepRotorGroupIn:
             esc_sync_rectification (bool | Unset): Synchronous rectification (comp_pwm); default ON Default: True.
             esc_timing (SweepRotorGroupInEscTiming | Unset): Six-step commutation advance preset (low 7.5°/medium 15°/high
                 22.5°/auto duty-scheduled); FOC ignores it Default: SweepRotorGroupInEscTiming.MEDIUM.
-            esc_type (SweepRotorGroupInEscType | Unset): ESC commutation type Default: SweepRotorGroupInEscType.FOC.
+            esc_type (SweepRotorGroupInEscType | Unset): ESC commutation type. Selects K_volt, copper_mult, iron_mult, the
+                six-step commutation-advance physics and the throttle->duty map — not a cosmetic flag. Single-sourced (ESC-7):
+                app/constants_esc.py. Default: SweepRotorGroupInEscType.SIX_STEP.
             motor_component_id (None | str | Unset):
             motor_cooling_source (SweepRotorGroupInMotorCoolingSource | Unset): Per-rotor-group motor cooling mode. cowling
                 = still air; prop_exit_velocity = forced convection from the prop slipstream (default); custom = fixed velocity
@@ -47,14 +49,18 @@ class SweepRotorGroupIn:
                 when motor_cooling_source=custom.
             motor_r_th (float | None | Unset): Custom direct motor thermal resistance override (K/W); only used when
                 motor_cooling_source=custom.
-            motor_t_mag (float | None | Unset): Optional fixed magnet temperature (°C); omit to let the model compute it.
-            motor_t_w (float | None | Unset): Optional fixed winding temperature (°C); omit to let the model compute it.
-            tilt_deg (float | Unset): Ground-mode rotor-axis tilt from vertical (0° = lift/hover, 90° = forward/cruise).
-                Decomposed host-side to (V_axial, V_edge).. Default: 0.0.
+            motor_t_mag (float | None | Unset): Optional fixed magnet temperature (°C, -60…250); omit to let the model
+                compute it.
+            motor_t_w (float | None | Unset): Optional fixed winding temperature (°C, -60…250); omit to let the model
+                compute it.
+            tilt_deg (float | Unset): Ground-mode rotor-axis tilt measured from the horizontal-forward (flight) direction
+                (0° = forward/cruise — the axis lies along the flight path and all airspeed becomes axial inflow; 90° =
+                lift/hover — the axis points up and forward airspeed becomes pure edgewise inflow). Decomposed host-side to
+                V_axial = V_h·cosθ + V_v·sinθ, V_edge = |V_v·cosθ − V_h·sinθ|. Default: 0.0.
             v_axial_m_s (float | None | Unset): Components-mode signed axial inflow (m/s); only with
-                inflow_mode='components'..
+                inflow_mode='components'.
             v_edge_m_s (float | None | Unset): Components-mode edgewise inflow magnitude (m/s, ≥0); only with
-                inflow_mode='components'..
+                inflow_mode='components'.
     """
 
     label: str
@@ -68,7 +74,7 @@ class SweepRotorGroupIn:
     esc_resistance_mohm: float | Unset = 0.0
     esc_sync_rectification: bool | Unset = True
     esc_timing: SweepRotorGroupInEscTiming | Unset = SweepRotorGroupInEscTiming.MEDIUM
-    esc_type: SweepRotorGroupInEscType | Unset = SweepRotorGroupInEscType.FOC
+    esc_type: SweepRotorGroupInEscType | Unset = SweepRotorGroupInEscType.SIX_STEP
     motor_component_id: None | str | Unset = UNSET
     motor_cooling_source: SweepRotorGroupInMotorCoolingSource | Unset = (
         SweepRotorGroupInMotorCoolingSource.PROP_EXIT_VELOCITY

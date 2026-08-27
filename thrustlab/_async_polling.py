@@ -1,8 +1,8 @@
 """Polling helpers for async resources (simulations, sweeps).
 
 The terminal states are: 'completed' | 'failed' | 'canceled' — these are the
-exact wire values the v1 API emits (see backend/app/v1/_async_serialize.py
-``_DB_TO_V1``; DB ``cancelled`` maps to wire ``canceled`` with one 'l').
+exact wire values the v1 API emits. The stored ``cancelled`` state maps to wire
+``canceled`` with one 'l'.
 'timed_out' is an SDK-side sentinel set when wait() exceeds its timeout budget
 — it is never returned by the server.
 """

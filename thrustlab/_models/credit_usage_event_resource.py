@@ -22,7 +22,8 @@ class CreditUsageEventResource:
     """
     Attributes:
         amount (int):
-        balance_after (int):
+        balance_after (int | None): Remaining Free allowance after this event, or null for unlimited Hobbyist and Pro
+            accounts.
         created_at (str):
         id (str):
         type_ (CreditUsageEventResourceType):
@@ -32,7 +33,7 @@ class CreditUsageEventResource:
     """
 
     amount: int
-    balance_after: int
+    balance_after: int | None
     created_at: str
     id: str
     type_: CreditUsageEventResourceType
@@ -46,6 +47,7 @@ class CreditUsageEventResource:
 
         amount = self.amount
 
+        balance_after: int | None
         balance_after = self.balance_after
 
         created_at = self.created_at
@@ -92,7 +94,12 @@ class CreditUsageEventResource:
         d = dict(src_dict)
         amount = d.pop("amount")
 
-        balance_after = d.pop("balance_after")
+        def _parse_balance_after(data: object) -> int | None:
+            if data is None:
+                return data
+            return cast(int | None, data)
+
+        balance_after = _parse_balance_after(d.pop("balance_after"))
 
         created_at = d.pop("created_at")
 

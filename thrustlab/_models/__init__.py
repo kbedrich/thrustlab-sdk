@@ -7,6 +7,10 @@ from thrustlab._models.analyze_geometry_request import AnalyzeGeometryRequest
 from thrustlab._models.analyze_geometry_request_mode import AnalyzeGeometryRequestMode
 from thrustlab._models.analyze_geometry_request_target_type_type_0 import AnalyzeGeometryRequestTargetTypeType0
 from thrustlab._models.analyze_geometry_response import AnalyzeGeometryResponse
+from thrustlab._models.analyze_geometry_response_envelope_limiting_factor_type_0 import (
+    AnalyzeGeometryResponseEnvelopeLimitingFactorType0,
+)
+from thrustlab._models.analyze_geometry_response_envelope_status_type_0 import AnalyzeGeometryResponseEnvelopeStatusType0
 from thrustlab._models.analyze_station_row import AnalyzeStationRow
 from thrustlab._models.body_import_airfoil_v1_airfoils_import_post import BodyImportAirfoilV1AirfoilsImportPost
 from thrustlab._models.calibrate_accepted_response import CalibrateAcceptedResponse
@@ -47,13 +51,21 @@ from thrustlab._models.dynamic_estimate_resource import DynamicEstimateResource
 from thrustlab._models.dynamic_list_response import DynamicListResponse
 from thrustlab._models.dynamic_patch import DynamicPatch
 from thrustlab._models.dynamic_resource import DynamicResource
+from thrustlab._models.dynamic_resource_battery_topology_type_0 import DynamicResourceBatteryTopologyType0
 from thrustlab._models.dynamic_resource_display_labels_type_0 import DynamicResourceDisplayLabelsType0
 from thrustlab._models.dynamic_resource_error_type_0 import DynamicResourceErrorType0
 from thrustlab._models.dynamic_resource_input_snapshot_type_0 import DynamicResourceInputSnapshotType0
 from thrustlab._models.dynamic_resource_result_type_0 import DynamicResourceResultType0
 from thrustlab._models.dynamic_resource_status import DynamicResourceStatus
 from thrustlab._models.dynamic_rotor_group_in import DynamicRotorGroupIn
+from thrustlab._models.dynamic_rotor_group_in_esc_timing import DynamicRotorGroupInEscTiming
+from thrustlab._models.dynamic_rotor_group_in_esc_type import DynamicRotorGroupInEscType
 from thrustlab._models.dynamic_rotor_group_in_motor_cooling_source import DynamicRotorGroupInMotorCoolingSource
+from thrustlab._models.dynamic_rotor_in import DynamicRotorIn
+from thrustlab._models.dynamic_rotor_in_esc_timing import DynamicRotorInEscTiming
+from thrustlab._models.dynamic_rotor_in_esc_type import DynamicRotorInEscType
+from thrustlab._models.dynamic_rotor_in_motor_cooling_source import DynamicRotorInMotorCoolingSource
+from thrustlab._models.dynamic_rotor_in_rotation_sense import DynamicRotorInRotationSense
 from thrustlab._models.entitlements_resource import EntitlementsResource
 from thrustlab._models.export_geometry_request import ExportGeometryRequest
 from thrustlab._models.export_geometry_request_format import ExportGeometryRequestFormat
@@ -62,7 +74,6 @@ from thrustlab._models.fire_test_event_v1_webhook_endpoints_public_id_test_post_
     FireTestEventV1WebhookEndpointsPublicIdTestPostResponseFireTestEventV1WebhookEndpointsPublicIdTestPost,
 )
 from thrustlab._models.generate_geometry_request import GenerateGeometryRequest
-from thrustlab._models.geometry_preview_response import GeometryPreviewResponse
 from thrustlab._models.geometry_response import GeometryResponse
 from thrustlab._models.geometry_style_resource import GeometryStyleResource
 from thrustlab._models.geometry_styles_list_response import GeometryStylesListResponse
@@ -94,10 +105,13 @@ from thrustlab._models.list_public_propellers_v1_public_propellers_get_response_
 from thrustlab._models.list_webhook_endpoints_v1_webhook_endpoints_get_response_list_webhook_endpoints_v1_webhook_endpoints_get import (
     ListWebhookEndpointsV1WebhookEndpointsGetResponseListWebhookEndpointsV1WebhookEndpointsGet,
 )
+from thrustlab._models.pack_leaf_in import PackLeafIn
+from thrustlab._models.pack_parallel_in import PackParallelIn
+from thrustlab._models.pack_series_in import PackSeriesIn
+from thrustlab._models.pack_topology_in import PackTopologyIn
 from thrustlab._models.patch_webhook_endpoint_v1_webhook_endpoints_public_id_patch_response_patch_webhook_endpoint_v1_webhook_endpoints_public_id_patch import (
     PatchWebhookEndpointV1WebhookEndpointsPublicIdPatchResponsePatchWebhookEndpointV1WebhookEndpointsPublicIdPatch,
 )
-from thrustlab._models.preview_request import PreviewRequest
 from thrustlab._models.project_create_body import ProjectCreateBody
 from thrustlab._models.project_list_response import ProjectListResponse
 from thrustlab._models.project_patch import ProjectPatch
@@ -113,6 +127,11 @@ from thrustlab._models.rotor_group_in_esc_timing import RotorGroupInEscTiming
 from thrustlab._models.rotor_group_in_esc_type import RotorGroupInEscType
 from thrustlab._models.rotor_group_in_motor_cooling_source import RotorGroupInMotorCoolingSource
 from thrustlab._models.rotor_group_resource import RotorGroupResource
+from thrustlab._models.rotor_in import RotorIn
+from thrustlab._models.rotor_in_esc_timing import RotorInEscTiming
+from thrustlab._models.rotor_in_esc_type import RotorInEscType
+from thrustlab._models.rotor_in_motor_cooling_source import RotorInMotorCoolingSource
+from thrustlab._models.rotor_in_rotation_sense import RotorInRotationSense
 from thrustlab._models.run_queued_v1v1_simulations_run_queued_post_response_run_queued_v1v1_simulations_run_queued_post import (
     RunQueuedV1V1SimulationsRunQueuedPostResponseRunQueuedV1V1SimulationsRunQueuedPost,
 )
@@ -124,8 +143,8 @@ from thrustlab._models.schedule_in import ScheduleIn
 from thrustlab._models.schedule_in_interpolation_type_0 import ScheduleInInterpolationType0
 from thrustlab._models.schedule_in_mode import ScheduleInMode
 from thrustlab._models.segment_group_command_in import SegmentGroupCommandIn
-from thrustlab._models.segment_group_command_in_throttle_ramp import SegmentGroupCommandInThrottleRamp
-from thrustlab._models.segment_group_command_in_tilt_ramp import SegmentGroupCommandInTiltRamp
+from thrustlab._models.segment_group_command_in_throttle_ramp_type_0 import SegmentGroupCommandInThrottleRampType0
+from thrustlab._models.segment_group_command_in_tilt_ramp_type_0 import SegmentGroupCommandInTiltRampType0
 from thrustlab._models.segment_in import SegmentIn
 from thrustlab._models.segment_in_airspeed_ramp import SegmentInAirspeedRamp
 from thrustlab._models.segment_in_per_group import SegmentInPerGroup
@@ -143,6 +162,7 @@ from thrustlab._models.simulation_list_response import SimulationListResponse
 from thrustlab._models.simulation_patch import SimulationPatch
 from thrustlab._models.simulation_patch_plot_config_json_type_0_item import SimulationPatchPlotConfigJsonType0Item
 from thrustlab._models.simulation_resource import SimulationResource
+from thrustlab._models.simulation_resource_battery_topology_type_0 import SimulationResourceBatteryTopologyType0
 from thrustlab._models.simulation_resource_display_labels_type_0 import SimulationResourceDisplayLabelsType0
 from thrustlab._models.simulation_resource_error_type_0 import SimulationResourceErrorType0
 from thrustlab._models.simulation_resource_input_snapshot_type_0 import SimulationResourceInputSnapshotType0
@@ -174,11 +194,12 @@ from thrustlab._models.sweep_param_range_in import SweepParamRangeIn
 from thrustlab._models.sweep_param_range_in_mode import SweepParamRangeInMode
 from thrustlab._models.sweep_patch import SweepPatch
 from thrustlab._models.sweep_patch_plot_config_json_type_0_item import SweepPatchPlotConfigJsonType0Item
+from thrustlab._models.sweep_point_component_selection import SweepPointComponentSelection
+from thrustlab._models.sweep_point_inputs import SweepPointInputs
 from thrustlab._models.sweep_point_list_response import SweepPointListResponse
 from thrustlab._models.sweep_point_list_response_display_labels_type_0 import SweepPointListResponseDisplayLabelsType0
 from thrustlab._models.sweep_point_patch import SweepPointPatch
 from thrustlab._models.sweep_point_resource import SweepPointResource
-from thrustlab._models.sweep_point_resource_inputs import SweepPointResourceInputs
 from thrustlab._models.sweep_point_resource_rotors_type_0 import SweepPointResourceRotorsType0
 from thrustlab._models.sweep_point_resource_rotors_type_0_additional_property import SweepPointResourceRotorsType0AdditionalProperty
 from thrustlab._models.sweep_resource import SweepResource
@@ -192,9 +213,15 @@ from thrustlab._models.sweep_rotor_group_in import SweepRotorGroupIn
 from thrustlab._models.sweep_rotor_group_in_esc_timing import SweepRotorGroupInEscTiming
 from thrustlab._models.sweep_rotor_group_in_esc_type import SweepRotorGroupInEscType
 from thrustlab._models.sweep_rotor_group_in_motor_cooling_source import SweepRotorGroupInMotorCoolingSource
+from thrustlab._models.sweep_rotor_in import SweepRotorIn
+from thrustlab._models.sweep_rotor_in_esc_timing import SweepRotorInEscTiming
+from thrustlab._models.sweep_rotor_in_esc_type import SweepRotorInEscType
+from thrustlab._models.sweep_rotor_in_motor_cooling_source import SweepRotorInMotorCoolingSource
+from thrustlab._models.sweep_rotor_in_rotation_sense import SweepRotorInRotationSense
 from thrustlab._models.termination_in import TerminationIn
 from thrustlab._models.termination_in_mode import TerminationInMode
 from thrustlab._models.user_resource import UserResource
+from thrustlab._models.user_resource_gate_required_tiers import UserResourceGateRequiredTiers
 from thrustlab._models.user_resource_unit_system import UserResourceUnitSystem
 from thrustlab._models.v1_custom_component_override import V1CustomComponentOverride
 from thrustlab._models.v1_custom_component_override_spec_json import V1CustomComponentOverrideSpecJson
@@ -211,6 +238,8 @@ __all__ = (
     "AnalyzeGeometryRequestMode",
     "AnalyzeGeometryRequestTargetTypeType0",
     "AnalyzeGeometryResponse",
+    "AnalyzeGeometryResponseEnvelopeLimitingFactorType0",
+    "AnalyzeGeometryResponseEnvelopeStatusType0",
     "AnalyzeStationRow",
     "BodyImportAirfoilV1AirfoilsImportPost",
     "CalibrateAcceptedResponse",
@@ -249,20 +278,27 @@ __all__ = (
     "DynamicListResponse",
     "DynamicPatch",
     "DynamicResource",
+    "DynamicResourceBatteryTopologyType0",
     "DynamicResourceDisplayLabelsType0",
     "DynamicResourceErrorType0",
     "DynamicResourceInputSnapshotType0",
     "DynamicResourceResultType0",
     "DynamicResourceStatus",
     "DynamicRotorGroupIn",
+    "DynamicRotorGroupInEscTiming",
+    "DynamicRotorGroupInEscType",
     "DynamicRotorGroupInMotorCoolingSource",
+    "DynamicRotorIn",
+    "DynamicRotorInEscTiming",
+    "DynamicRotorInEscType",
+    "DynamicRotorInMotorCoolingSource",
+    "DynamicRotorInRotationSense",
     "EntitlementsResource",
     "ExportGeometryRequest",
     "ExportGeometryRequestFormat",
     "ExportGeometryRequestRotationType0",
     "FireTestEventV1WebhookEndpointsPublicIdTestPostResponseFireTestEventV1WebhookEndpointsPublicIdTestPost",
     "GenerateGeometryRequest",
-    "GeometryPreviewResponse",
     "GeometryResponse",
     "GeometryStyleResource",
     "GeometryStylesListResponse",
@@ -276,8 +312,11 @@ __all__ = (
     "ListEventsV1EventsGetResponseListEventsV1EventsGet",
     "ListPublicPropellersV1PublicPropellersGetResponseListPublicPropellersV1PublicPropellersGet",
     "ListWebhookEndpointsV1WebhookEndpointsGetResponseListWebhookEndpointsV1WebhookEndpointsGet",
+    "PackLeafIn",
+    "PackParallelIn",
+    "PackSeriesIn",
+    "PackTopologyIn",
     "PatchWebhookEndpointV1WebhookEndpointsPublicIdPatchResponsePatchWebhookEndpointV1WebhookEndpointsPublicIdPatch",
-    "PreviewRequest",
     "ProjectCreateBody",
     "ProjectListResponse",
     "ProjectPatch",
@@ -289,6 +328,11 @@ __all__ = (
     "RotorGroupInEscType",
     "RotorGroupInMotorCoolingSource",
     "RotorGroupResource",
+    "RotorIn",
+    "RotorInEscTiming",
+    "RotorInEscType",
+    "RotorInMotorCoolingSource",
+    "RotorInRotationSense",
     "RunQueuedV1V1SimulationsRunQueuedPostResponseRunQueuedV1V1SimulationsRunQueuedPost",
     "RunSelectedBody",
     "RunSelectedV1V1SimulationsRunSelectedPostResponseRunSelectedV1V1SimulationsRunSelectedPost",
@@ -296,8 +340,8 @@ __all__ = (
     "ScheduleInInterpolationType0",
     "ScheduleInMode",
     "SegmentGroupCommandIn",
-    "SegmentGroupCommandInThrottleRamp",
-    "SegmentGroupCommandInTiltRamp",
+    "SegmentGroupCommandInThrottleRampType0",
+    "SegmentGroupCommandInTiltRampType0",
     "SegmentIn",
     "SegmentInAirspeedRamp",
     "SegmentInPerGroup",
@@ -315,6 +359,7 @@ __all__ = (
     "SimulationPatch",
     "SimulationPatchPlotConfigJsonType0Item",
     "SimulationResource",
+    "SimulationResourceBatteryTopologyType0",
     "SimulationResourceDisplayLabelsType0",
     "SimulationResourceErrorType0",
     "SimulationResourceInputSnapshotType0",
@@ -346,11 +391,12 @@ __all__ = (
     "SweepParamRangeInMode",
     "SweepPatch",
     "SweepPatchPlotConfigJsonType0Item",
+    "SweepPointComponentSelection",
+    "SweepPointInputs",
     "SweepPointListResponse",
     "SweepPointListResponseDisplayLabelsType0",
     "SweepPointPatch",
     "SweepPointResource",
-    "SweepPointResourceInputs",
     "SweepPointResourceRotorsType0",
     "SweepPointResourceRotorsType0AdditionalProperty",
     "SweepResource",
@@ -364,9 +410,15 @@ __all__ = (
     "SweepRotorGroupInEscTiming",
     "SweepRotorGroupInEscType",
     "SweepRotorGroupInMotorCoolingSource",
+    "SweepRotorIn",
+    "SweepRotorInEscTiming",
+    "SweepRotorInEscType",
+    "SweepRotorInMotorCoolingSource",
+    "SweepRotorInRotationSense",
     "TerminationIn",
     "TerminationInMode",
     "UserResource",
+    "UserResourceGateRequiredTiers",
     "UserResourceUnitSystem",
     "V1CustomComponentOverride",
     "V1CustomComponentOverrideSpecJson",

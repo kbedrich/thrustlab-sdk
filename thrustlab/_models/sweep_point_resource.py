@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast
 from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
-    from thrustlab._models.sweep_point_resource_inputs import SweepPointResourceInputs
+    from thrustlab._models.sweep_point_inputs import SweepPointInputs
     from thrustlab._models.sweep_point_resource_rotors_type_0 import SweepPointResourceRotorsType0
 
 
@@ -17,7 +17,7 @@ T = TypeVar("T", bound="SweepPointResource")
 class SweepPointResource:
     """A single sweep grid point.
 
-    ``rotors`` is the full per-point PROM result dict — keyed per-rotor
+    ``rotors`` is the full per-point solver result dict — keyed per-rotor
     ("1", "2"...) plus the "All"/"Battery" aggregates — mirroring
     ``SimulationResource.result``. Each per-rotor entry follows the canonical
     snake_case ``SimulationResultV1`` shape (wired at read time in a later
@@ -36,7 +36,29 @@ class SweepPointResource:
         Attributes:
             failed (bool):
             index (int):
-            inputs (SweepPointResourceInputs):
+            inputs (SweepPointInputs): ESC-13 item 4 — the operating condition this grid point was solved at.
+
+                Previously typed ``dict[str, Any]``, which is the wire equivalent of saying
+                nothing: an SDK user got an untyped bag and had to learn the key set by
+                running a sweep and reading one. ESC-13 already made the RUNTIME blob
+                self-describing (it is built from the point rather than from a hardcoded
+                five-key literal, so a new axis appears the day it lands); this makes the
+                CONTRACT say so too.
+
+                ``extra="allow"`` is load-bearing, not laziness. Two families of key are
+                generated per-sweep and cannot be enumerated in a static model:
+
+                  * ``tilt_<group_index>`` — group-targeted tilt is one grid dimension per
+                    MASKED rotor group, so the key set depends on the mask.
+                  * ``component_<axis>_<slots>`` — a component axis contributes its selected
+                    index under a name encoding the slots it spans (``component_motor_0``,
+                    or ``component_motor_0-2`` when synced).
+
+                Declaring those away would be worse than leaving the model untyped, because
+                a strict model would DROP them at serialization — the same failure mode as
+                the 2026-06-02 aggregate-drop that ``rotors`` is deliberately non-coercing to
+                avoid. Every declared field is optional and permissively typed for the same
+                reason: this model documents the shape, it does not police it.
             is_starred (bool):
             object_ (Literal['sweep_point']):
             rotors (None | SweepPointResourceRotorsType0): Per-point rotor results, keyed per-rotor ("1", "2", ...) plus the
@@ -46,7 +68,7 @@ class SweepPointResource:
 
     failed: bool
     index: int
-    inputs: SweepPointResourceInputs
+    inputs: SweepPointInputs
     is_starred: bool
     object_: Literal["sweep_point"]
     rotors: None | SweepPointResourceRotorsType0
@@ -87,7 +109,7 @@ class SweepPointResource:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from thrustlab._models.sweep_point_resource_inputs import SweepPointResourceInputs
+        from thrustlab._models.sweep_point_inputs import SweepPointInputs
         from thrustlab._models.sweep_point_resource_rotors_type_0 import SweepPointResourceRotorsType0
 
         d = dict(src_dict)
@@ -95,7 +117,7 @@ class SweepPointResource:
 
         index = d.pop("index")
 
-        inputs = SweepPointResourceInputs.from_dict(d.pop("inputs"))
+        inputs = SweepPointInputs.from_dict(d.pop("inputs"))
 
         is_starred = d.pop("is_starred")
 

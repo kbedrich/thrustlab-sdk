@@ -12,7 +12,9 @@ from thrustlab._models.simulation_create_body_launch_intent import SimulationCre
 from thrustlab._models.types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from thrustlab._models.pack_topology_in import PackTopologyIn
     from thrustlab._models.rotor_group_in import RotorGroupIn
+    from thrustlab._models.rotor_in import RotorIn
     from thrustlab._models.v1_custom_component_override import V1CustomComponentOverride
 
 
@@ -30,19 +32,27 @@ class SimulationCreateBody:
         battery_charge_pct (float | Unset):  Default: 100.0.
         battery_component_id (None | str | Unset):
         battery_esc_wire_resistance_mohm (float | Unset):  Default: 0.0.
+        battery_topology (None | PackTopologyIn | Unset):
         cooling_source (None | SimulationCreateBodyCoolingSourceType0 | Unset):
         custom_battery (None | Unset | V1CustomComponentOverride):
         flight_duration (float | None | Unset): Flight time (seconds) for the time-bounded steady-state thermal solve. 0
             ≤ x ≤ 86400 (24 h). null disables time-bounding (infinite-hover baseline).. Default: 60.0.
-        flight_regime (SimulationCreateBodyFlightRegime | Unset): Convective cooling regime — maps to h_conv (W/m²·K) at
-            the battery thermal boundary.. Default: SimulationCreateBodyFlightRegime.STATIC_BENCH.
-        forced_air_velocity_m_s (float | None | Unset):
+        flight_regime (SimulationCreateBodyFlightRegime | Unset): DEPRECATED — use cooling_source instead. Still
+            accepted: when cooling_source is omitted, this value is mapped to the equivalent battery cooling source
+            (prop_wash_mild and prop_wash_strong → prop_slipstream, forced_air → forced_air, static_bench → static).
+            cooling_source wins whenever both are supplied. Default: SimulationCreateBodyFlightRegime.STATIC_BENCH.
+        forced_air_velocity_m_s (float | None | Unset): Fixed cooling velocity (m/s) for cooling_source='forced_air'
+            (fan/duct). Ignored for the other cooling sources; defaults to 10 m/s when omitted..
         inflow_mode (SimulationCreateBodyInflowMode | Unset):  Default: SimulationCreateBodyInflowMode.GROUND.
         launch_intent (SimulationCreateBodyLaunchIntent | Unset): Launch intent. 'run' dispatches now; 'queue' reserves
             a credit slot but defers dispatch; 'draft' persists with no credit reservation and no dispatch.. Default:
             SimulationCreateBodyLaunchIntent.RUN.
         name (None | str | Unset):
         rotor_groups (list[RotorGroupIn] | Unset):
+        rotors (list[RotorIn] | None | Unset): One entry per rotor. Preferred over rotor_groups, and required for
+            coaxial stacks: set coax_stack_id to the same non-zero value on the rotors that share an axis, give each a
+            distinct coax_position_m (metres, increasing downstream), and set opposite rotation_sense values for a contra-
+            rotating stack. Supply either rotors or rotor_groups, not both.
         vertical_speed_m_s (float | Unset):  Default: 0.0.
     """
 
@@ -53,6 +63,7 @@ class SimulationCreateBody:
     battery_charge_pct: float | Unset = 100.0
     battery_component_id: None | str | Unset = UNSET
     battery_esc_wire_resistance_mohm: float | Unset = 0.0
+    battery_topology: None | PackTopologyIn | Unset = UNSET
     cooling_source: None | SimulationCreateBodyCoolingSourceType0 | Unset = UNSET
     custom_battery: None | Unset | V1CustomComponentOverride = UNSET
     flight_duration: float | None | Unset = 60.0
@@ -62,9 +73,11 @@ class SimulationCreateBody:
     launch_intent: SimulationCreateBodyLaunchIntent | Unset = SimulationCreateBodyLaunchIntent.RUN
     name: None | str | Unset = UNSET
     rotor_groups: list[RotorGroupIn] | Unset = UNSET
+    rotors: list[RotorIn] | None | Unset = UNSET
     vertical_speed_m_s: float | Unset = 0.0
 
     def to_dict(self) -> dict[str, Any]:
+        from thrustlab._models.pack_topology_in import PackTopologyIn
         from thrustlab._models.v1_custom_component_override import V1CustomComponentOverride
 
         airspeed_m_s = self.airspeed_m_s
@@ -84,6 +97,14 @@ class SimulationCreateBody:
             battery_component_id = self.battery_component_id
 
         battery_esc_wire_resistance_mohm = self.battery_esc_wire_resistance_mohm
+
+        battery_topology: dict[str, Any] | None | Unset
+        if isinstance(self.battery_topology, Unset):
+            battery_topology = UNSET
+        elif isinstance(self.battery_topology, PackTopologyIn):
+            battery_topology = self.battery_topology.to_dict()
+        else:
+            battery_topology = self.battery_topology
 
         cooling_source: None | str | Unset
         if isinstance(self.cooling_source, Unset):
@@ -138,6 +159,18 @@ class SimulationCreateBody:
                 rotor_groups_item = rotor_groups_item_data.to_dict()
                 rotor_groups.append(rotor_groups_item)
 
+        rotors: list[dict[str, Any]] | None | Unset
+        if isinstance(self.rotors, Unset):
+            rotors = UNSET
+        elif isinstance(self.rotors, list):
+            rotors = []
+            for rotors_type_0_item_data in self.rotors:
+                rotors_type_0_item = rotors_type_0_item_data.to_dict()
+                rotors.append(rotors_type_0_item)
+
+        else:
+            rotors = self.rotors
+
         vertical_speed_m_s = self.vertical_speed_m_s
 
         field_dict: dict[str, Any] = {}
@@ -157,6 +190,8 @@ class SimulationCreateBody:
             field_dict["battery_component_id"] = battery_component_id
         if battery_esc_wire_resistance_mohm is not UNSET:
             field_dict["battery_esc_wire_resistance_mohm"] = battery_esc_wire_resistance_mohm
+        if battery_topology is not UNSET:
+            field_dict["battery_topology"] = battery_topology
         if cooling_source is not UNSET:
             field_dict["cooling_source"] = cooling_source
         if custom_battery is not UNSET:
@@ -175,6 +210,8 @@ class SimulationCreateBody:
             field_dict["name"] = name
         if rotor_groups is not UNSET:
             field_dict["rotor_groups"] = rotor_groups
+        if rotors is not UNSET:
+            field_dict["rotors"] = rotors
         if vertical_speed_m_s is not UNSET:
             field_dict["vertical_speed_m_s"] = vertical_speed_m_s
 
@@ -182,7 +219,9 @@ class SimulationCreateBody:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from thrustlab._models.pack_topology_in import PackTopologyIn
         from thrustlab._models.rotor_group_in import RotorGroupIn
+        from thrustlab._models.rotor_in import RotorIn
         from thrustlab._models.v1_custom_component_override import V1CustomComponentOverride
 
         d = dict(src_dict)
@@ -206,6 +245,23 @@ class SimulationCreateBody:
         battery_component_id = _parse_battery_component_id(d.pop("battery_component_id", UNSET))
 
         battery_esc_wire_resistance_mohm = d.pop("battery_esc_wire_resistance_mohm", UNSET)
+
+        def _parse_battery_topology(data: object) -> None | PackTopologyIn | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                battery_topology_type_0 = PackTopologyIn.from_dict(data)
+
+                return battery_topology_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | PackTopologyIn | Unset, data)
+
+        battery_topology = _parse_battery_topology(d.pop("battery_topology", UNSET))
 
         def _parse_cooling_source(data: object) -> None | SimulationCreateBodyCoolingSourceType0 | Unset:
             if data is None:
@@ -298,6 +354,28 @@ class SimulationCreateBody:
 
                 rotor_groups.append(rotor_groups_item)
 
+        def _parse_rotors(data: object) -> list[RotorIn] | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                rotors_type_0 = []
+                _rotors_type_0 = data
+                for rotors_type_0_item_data in _rotors_type_0:
+                    rotors_type_0_item = RotorIn.from_dict(rotors_type_0_item_data)
+
+                    rotors_type_0.append(rotors_type_0_item)
+
+                return rotors_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(list[RotorIn] | None | Unset, data)
+
+        rotors = _parse_rotors(d.pop("rotors", UNSET))
+
         vertical_speed_m_s = d.pop("vertical_speed_m_s", UNSET)
 
         simulation_create_body = cls(
@@ -308,6 +386,7 @@ class SimulationCreateBody:
             battery_charge_pct=battery_charge_pct,
             battery_component_id=battery_component_id,
             battery_esc_wire_resistance_mohm=battery_esc_wire_resistance_mohm,
+            battery_topology=battery_topology,
             cooling_source=cooling_source,
             custom_battery=custom_battery,
             flight_duration=flight_duration,
@@ -317,6 +396,7 @@ class SimulationCreateBody:
             launch_intent=launch_intent,
             name=name,
             rotor_groups=rotor_groups,
+            rotors=rotors,
             vertical_speed_m_s=vertical_speed_m_s,
         )
 

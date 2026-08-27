@@ -48,6 +48,7 @@ class SweepResource:
         dispatched_at (None | str | Unset):
         input_snapshot (None | SweepResourceInputSnapshotType0 | Unset):
         snapshot_version (int | Unset):  Default: 1.
+        solver_engine (str | Unset):  Default: 'prom-rs/0.2.1'.
     """
 
     analysis_type: str
@@ -73,6 +74,7 @@ class SweepResource:
     dispatched_at: None | str | Unset = UNSET
     input_snapshot: None | SweepResourceInputSnapshotType0 | Unset = UNSET
     snapshot_version: int | Unset = 1
+    solver_engine: str | Unset = "prom-rs/0.2.1"
 
     def to_dict(self) -> dict[str, Any]:
         from thrustlab._models.sweep_resource_error_type_0 import SweepResourceErrorType0
@@ -163,6 +165,8 @@ class SweepResource:
 
         snapshot_version = self.snapshot_version
 
+        solver_engine = self.solver_engine
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -195,6 +199,8 @@ class SweepResource:
             field_dict["input_snapshot"] = input_snapshot
         if snapshot_version is not UNSET:
             field_dict["snapshot_version"] = snapshot_version
+        if solver_engine is not UNSET:
+            field_dict["solver_engine"] = solver_engine
 
         return field_dict
 
@@ -363,6 +369,8 @@ class SweepResource:
 
         snapshot_version = d.pop("snapshot_version", UNSET)
 
+        solver_engine = d.pop("solver_engine", UNSET)
+
         sweep_resource = cls(
             analysis_type=analysis_type,
             battery_component_id=battery_component_id,
@@ -387,6 +395,7 @@ class SweepResource:
             dispatched_at=dispatched_at,
             input_snapshot=input_snapshot,
             snapshot_version=snapshot_version,
+            solver_engine=solver_engine,
         )
 
         return sweep_resource

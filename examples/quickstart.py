@@ -21,9 +21,11 @@ for component in islice(client.components.list(type="motor"), 5):
 # One-hit lookup: find() returns the single match (or raises
 # AmbiguousComponentError on >1, NotFoundError on 0) so you don't have to
 # round-trip the list yourself. Or paste explicit IDs from the catalog.
-motor = client.components.find(name="Spektrum Avian 4260 800Kv")
+motor = client.components.find(name="BadAss 2826-820Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="Liperior 5000mAh 4S 35C")
+battery = client.components.find(
+    name="Liperior 5000mAh 4S 35C 14.8V Lipo Battery With XT90 Plug"
+)
 
 # Run a single-point simulation and wait for the result.
 sim = client.simulations.create(

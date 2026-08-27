@@ -4,8 +4,8 @@ Run it:
     export THRUSTLAB_API_KEY=key_...        # never hard-code the key
     python examples/simulations/run_sync.py
 
-The verification combo below (Spektrum Avian 4260 800 kV + 10.5x4.5 + Liperior
-4S 5000 mAh @ 70% throttle, static) converges to ~9.78 N / ~8645 rpm. Swap in
+The verification combo below (BadAss 2826-820Kv + 10.5x4.5 + Liperior
+4S 5000 mAh @ 70% throttle, static) converges to ~9.07 N / ~8505 rpm. Swap in
 your own component IDs, or resolve them by name with client.components.find(...).
 """
 
@@ -18,9 +18,11 @@ project = client.projects.create(name="sdk single-point example")
 # Resolve components by name (find() returns the single match or raises
 # AmbiguousComponentError / NotFoundError). Or paste explicit IDs instead:
 #   motor_id = "comp_motor_xxx"
-motor = client.components.find(name="Spektrum Avian 4260 800Kv")
+motor = client.components.find(name="BadAss 2826-820Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="Liperior 5000mAh 4S 35C")
+battery = client.components.find(
+    name="Liperior 5000mAh 4S 35C 14.8V Lipo Battery With XT90 Plug"
+)
 
 sim = client.simulations.create(
     project_id=project["id"],

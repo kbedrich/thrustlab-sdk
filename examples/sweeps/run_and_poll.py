@@ -16,9 +16,11 @@ client = Client()  # reads $THRUSTLAB_API_KEY from the environment
 project = client.projects.create(name="sdk sweep example")
 
 # Resolve by name, or paste explicit IDs: motor_id = "comp_motor_xxx"
-motor = client.components.find(name="Spektrum Avian 4260 800Kv")
+motor = client.components.find(name="BadAss 2826-820Kv")
 prop = client.components.find(name="10.5x4.5")
-battery = client.components.find(name="Liperior 5000mAh 4S 35C")
+battery = client.components.find(
+    name="Liperior 5000mAh 4S 35C 14.8V Lipo Battery With XT90 Plug"
+)
 
 sweep = client.sweeps.create(
     project_id=project["id"],

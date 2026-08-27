@@ -27,7 +27,7 @@ class ExportGeometryRequest:
 
     * ``extra="forbid"`` — a stray field (e.g. a motor_id) is rejected.
     * every numeric field carries a bound; the geometry arrays are capped at 200
-     stations and ``num_blades`` at 16 (the warm-set max) — the DoS guard, enforced BEFORE any loft.
+     stations and ``num_blades`` at ``MAX_NUM_BLADES`` (16) — the DoS guard, enforced BEFORE any loft.
     * when ``section_coords`` is present, every station must share the same point
      count (a well-posed loft requires it) — the ``@model_validator``.
 
@@ -37,7 +37,8 @@ class ExportGeometryRequest:
             diameter (float | None | Unset): Diameter in inches
             format_ (ExportGeometryRequestFormat | Unset):  Default: ExportGeometryRequestFormat.STEP.
             hub_radius (float | None | Unset):
-            include_hub (bool | None | Unset):
+            include_hub (bool | None | Unset): Deprecated no-op: the hub and hub-to-root transition are always included in
+                the exported body.
             name (None | str | Unset):
             num_blades (int | Unset):  Default: 2.
             radius (list[float] | None | Unset): Absolute radii in meters

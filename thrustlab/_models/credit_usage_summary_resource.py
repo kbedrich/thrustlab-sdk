@@ -18,8 +18,8 @@ class CreditUsageSummaryResource:
 
     ``used`` is in COMPUTE UNITS (per physical rotor) — inherited from
     ``metering.used_in_window`` which SUMs ``abs(amount)`` (a 4-rotor static
-    counts 4). ``cap``/``remaining`` are None only for an uncapped tier (none
-    today; free=daily, paid=weekly). ``resets_at`` is the ROLLING window's next
+    counts 4). ``cap``/``remaining`` are None for Hobbyist/Pro because paid
+    usage is unlimited. ``resets_at`` is the ROLLING reporting window's next
     age-out instant (oldest in-window debit + window length), NEVER
     ``since + window`` (which always equals ``now``).
 

@@ -11,6 +11,7 @@ from thrustlab._models.types import UNSET, Unset
 if TYPE_CHECKING:
     from thrustlab._models.rotor_group_resource import RotorGroupResource
     from thrustlab._models.simulation_inputs import SimulationInputs
+    from thrustlab._models.simulation_resource_battery_topology_type_0 import SimulationResourceBatteryTopologyType0
     from thrustlab._models.simulation_resource_display_labels_type_0 import SimulationResourceDisplayLabelsType0
     from thrustlab._models.simulation_resource_error_type_0 import SimulationResourceErrorType0
     from thrustlab._models.simulation_resource_input_snapshot_type_0 import SimulationResourceInputSnapshotType0
@@ -42,11 +43,13 @@ class SimulationResource:
         result (None | SimulationResourceResultType0):
         rotor_groups (list[RotorGroupResource]):
         status (SimulationResourceStatus):
+        battery_topology (None | SimulationResourceBatteryTopologyType0 | Unset):
         dispatched_at (None | str | Unset):
         display_labels (None | SimulationResourceDisplayLabelsType0 | Unset):
         input_snapshot (None | SimulationResourceInputSnapshotType0 | Unset):
         project_name (None | str | Unset):
         snapshot_version (int | Unset):  Default: 1.
+        solver_engine (str | Unset):  Default: 'prom-rs/0.2.1'.
     """
 
     analysis_type: str
@@ -66,13 +69,16 @@ class SimulationResource:
     result: None | SimulationResourceResultType0
     rotor_groups: list[RotorGroupResource]
     status: SimulationResourceStatus
+    battery_topology: None | SimulationResourceBatteryTopologyType0 | Unset = UNSET
     dispatched_at: None | str | Unset = UNSET
     display_labels: None | SimulationResourceDisplayLabelsType0 | Unset = UNSET
     input_snapshot: None | SimulationResourceInputSnapshotType0 | Unset = UNSET
     project_name: None | str | Unset = UNSET
     snapshot_version: int | Unset = 1
+    solver_engine: str | Unset = "prom-rs/0.2.1"
 
     def to_dict(self) -> dict[str, Any]:
+        from thrustlab._models.simulation_resource_battery_topology_type_0 import SimulationResourceBatteryTopologyType0
         from thrustlab._models.simulation_resource_display_labels_type_0 import SimulationResourceDisplayLabelsType0
         from thrustlab._models.simulation_resource_error_type_0 import SimulationResourceErrorType0
         from thrustlab._models.simulation_resource_input_snapshot_type_0 import SimulationResourceInputSnapshotType0
@@ -135,6 +141,14 @@ class SimulationResource:
 
         status = self.status.value
 
+        battery_topology: dict[str, Any] | None | Unset
+        if isinstance(self.battery_topology, Unset):
+            battery_topology = UNSET
+        elif isinstance(self.battery_topology, SimulationResourceBatteryTopologyType0):
+            battery_topology = self.battery_topology.to_dict()
+        else:
+            battery_topology = self.battery_topology
+
         dispatched_at: None | str | Unset
         if isinstance(self.dispatched_at, Unset):
             dispatched_at = UNSET
@@ -165,6 +179,8 @@ class SimulationResource:
 
         snapshot_version = self.snapshot_version
 
+        solver_engine = self.solver_engine
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -188,6 +204,8 @@ class SimulationResource:
                 "status": status,
             }
         )
+        if battery_topology is not UNSET:
+            field_dict["battery_topology"] = battery_topology
         if dispatched_at is not UNSET:
             field_dict["dispatched_at"] = dispatched_at
         if display_labels is not UNSET:
@@ -198,6 +216,8 @@ class SimulationResource:
             field_dict["project_name"] = project_name
         if snapshot_version is not UNSET:
             field_dict["snapshot_version"] = snapshot_version
+        if solver_engine is not UNSET:
+            field_dict["solver_engine"] = solver_engine
 
         return field_dict
 
@@ -205,6 +225,7 @@ class SimulationResource:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from thrustlab._models.rotor_group_resource import RotorGroupResource
         from thrustlab._models.simulation_inputs import SimulationInputs
+        from thrustlab._models.simulation_resource_battery_topology_type_0 import SimulationResourceBatteryTopologyType0
         from thrustlab._models.simulation_resource_display_labels_type_0 import SimulationResourceDisplayLabelsType0
         from thrustlab._models.simulation_resource_error_type_0 import SimulationResourceErrorType0
         from thrustlab._models.simulation_resource_input_snapshot_type_0 import SimulationResourceInputSnapshotType0
@@ -319,6 +340,23 @@ class SimulationResource:
 
         status = SimulationResourceStatus(d.pop("status"))
 
+        def _parse_battery_topology(data: object) -> None | SimulationResourceBatteryTopologyType0 | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                battery_topology_type_0 = SimulationResourceBatteryTopologyType0.from_dict(data)
+
+                return battery_topology_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | SimulationResourceBatteryTopologyType0 | Unset, data)
+
+        battery_topology = _parse_battery_topology(d.pop("battery_topology", UNSET))
+
         def _parse_dispatched_at(data: object) -> None | str | Unset:
             if data is None:
                 return data
@@ -373,6 +411,8 @@ class SimulationResource:
 
         snapshot_version = d.pop("snapshot_version", UNSET)
 
+        solver_engine = d.pop("solver_engine", UNSET)
+
         simulation_resource = cls(
             analysis_type=analysis_type,
             battery_component_id=battery_component_id,
@@ -391,11 +431,13 @@ class SimulationResource:
             result=result,
             rotor_groups=rotor_groups,
             status=status,
+            battery_topology=battery_topology,
             dispatched_at=dispatched_at,
             display_labels=display_labels,
             input_snapshot=input_snapshot,
             project_name=project_name,
             snapshot_version=snapshot_version,
+            solver_engine=solver_engine,
         )
 
         return simulation_resource
