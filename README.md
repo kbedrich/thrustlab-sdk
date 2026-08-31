@@ -57,6 +57,33 @@ Runnable end-to-end examples for every simulation type live in
 [`sweeps/run_and_poll.py`](./examples/sweeps/run_and_poll.py), and
 [`dynamic/run_and_poll.py`](./examples/dynamic/run_and_poll.py).
 
+## FMU export and SITL
+
+Export a completed simulation as an FMI 3.0 co-simulation FMU:
+
+```python
+job_id = client.fmu.export(sim_id)["id"]
+client.fmu.wait(job_id)
+client.fmu.download(job_id, "powertrain.fmu")
+```
+
+The FMU exposes per-rotor inputs and outputs, battery and thermal state, and a
+validity envelope; it runs in any FMI 3.0 co-simulation host and is verified
+in Simulink.
+
+`thrustlab-sitl`, installed with the SDK, flies the FMU in ArduPilot SITL or
+Betaflight SITL (`--target betaflight`). See
+[`thrustlab/sitl/README.md`](./thrustlab/sitl/README.md) for the full
+documentation.
+
+```shell
+thrustlab-sitl --fmu powertrain.fmu --vehicle quad_x.yaml --target betaflight
+```
+
+See [`examples/fmu/`](./examples/fmu/) for bundled ready-to-fly FMUs with
+quadcopter, Y6 coax, and tilt-tricopter missions, an endurance study, and
+replay rendering.
+
 ## Why the SDK (and not `urllib` / `wget`)?
 
 The SDK gives you automatic retries with backoff, idempotency keys, cursor
@@ -95,6 +122,7 @@ client.submissions
 client.starred_components
 client.compute_units
 client.webhook_endpoints
+client.fmu
 ```
 
 ## Error handling
