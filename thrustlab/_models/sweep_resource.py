@@ -48,7 +48,7 @@ class SweepResource:
         dispatched_at (None | str | Unset):
         input_snapshot (None | SweepResourceInputSnapshotType0 | Unset):
         snapshot_version (int | Unset):  Default: 1.
-        solver_engine (str | Unset):  Default: 'prom-rs/0.2.5'.
+        solver_engine (str | Unset):  Default: 'prom-rs/0.2.6'.
     """
 
     analysis_type: str
@@ -74,7 +74,7 @@ class SweepResource:
     dispatched_at: None | str | Unset = UNSET
     input_snapshot: None | SweepResourceInputSnapshotType0 | Unset = UNSET
     snapshot_version: int | Unset = 1
-    solver_engine: str | Unset = "prom-rs/0.2.5"
+    solver_engine: str | Unset = "prom-rs/0.2.6"
 
     def to_dict(self) -> dict[str, Any]:
         from thrustlab._models.sweep_resource_error_type_0 import SweepResourceErrorType0

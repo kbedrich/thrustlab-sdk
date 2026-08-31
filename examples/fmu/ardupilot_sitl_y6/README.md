@@ -32,15 +32,19 @@ python -m thrustlab.sitl \
 ```
 
 ```sh
-python ../ardupilot_sitl/fly_mission.py --out-dir ./mission_out --speed-scale 0.3
+python ../ardupilot_sitl/fly_mission.py --out-dir ./mission_out --speed-scale 0.42
 ```
 
-`--speed-scale 0.3` matters here: a coax lane's sampled envelope is tighter
-than a solo rotor's map — edgewise speed caps near 5 m/s at this scale and
-descent states are not sampled at all — so the full-speed mission spends
-most of its time flagged `all_in_envelope=false` (outputs clamp to the
-envelope edge instead of being measured). Scaled down, the flight stays on
-sampled physics except for brief descents.
+`--speed-scale 0.42` uses the bundled FMU's wider sampled coax envelope: at
+hover rotor speed, it covers level edgewise flight to about 7 m/s, descent to
+3 m/s, and gentle approach legs (about 1.5 m/s down) to about 4.5 m/s
+edgewise. The entire 397-second demo mission stays on measured physics, with
+99.2% of armed frames `all_in_envelope`; the remainder are brief arm/disarm
+spool transients. The binding limit is the slowest rotor because the edgewise
+axis scales with rotor speed, advance-ratio style: in forward flight the
+unloaded rear-lower rotor reaches the envelope edge near 6.3 m/s, while
+loaded rotors remain covered to about 7.3 m/s. Beyond the envelope, outputs
+clamp to its edge and set `all_in_envelope=false` rather than extrapolating.
 
 ## The plots
 
