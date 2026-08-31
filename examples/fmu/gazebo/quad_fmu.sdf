@@ -1,0 +1,373 @@
+<?xml version="1.0" ?>
+<!--
+  An x500-class quad with four rotor links on a base, mixed rotation senses,
+  wired to a ThrustLab FMU (adapted from the fmu-gz-plugin smoke world).
+
+  <fmu_dir> expands ${TL_FMU_DIR} from the environment — point it at your
+  UNZIPPED exported FMU:
+
+      TL_FMU_DIR=/path/to/unzipped_fmu gz sim -s -r --iterations 2000 \
+          quad_fmu.sdf
+
+  The FMU must be UNZIPPED. Rotor geometry (quad-X, 0.13 m half-arm):
+
+      rotor_0 (+x,+y) ccw       rotor_3 (-x,+y) cw
+      rotor_1 (+x,-y) cw        rotor_2 (-x,-y) ccw
+
+  The <sense> values must agree with the FMU's rotor_manifest; the plugin uses
+  them only to spin the visual joint the right way.
+-->
+<sdf version="1.9">
+  <world name="quad_fmu">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <!-- Real time for the interactive GUI. Headless gate runs pass
+           - -iterations anyway; add <real_time_factor>0</real_time_factor>
+           back if you want an as-fast-as-possible batch run. -->
+      <real_time_factor>1</real_time_factor>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <scene>
+      <background>0.067 0.067 0.067 1</background>
+      <ambient>0.25 0.24 0.22 1</ambient>
+      <grid>false</grid>
+      <shadows>true</shadows>
+    </scene>
+
+    <light type="directional" name="key">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.85 0.78 0.66 1</diffuse>
+      <specular>0.3 0.28 0.24 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <light type="directional" name="fill">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.22 0.24 0.26 1</diffuse>
+      <specular>0 0 0 1</specular>
+      <direction>0.6 -0.2 -0.7</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <material>
+            <ambient>0.106 0.106 0.106 1</ambient>
+            <diffuse>0.106 0.106 0.106 1</diffuse>
+            <specular>0.05 0.05 0.05 1</specular>
+          </material>
+        </visual>
+        <!-- A sparse ring of pads so climb and yaw read against something. -->
+        <visual name="pad_center">
+          <pose>0 0 0.001 0 0 0</pose>
+          <geometry><cylinder><radius>0.65</radius><length>0.002</length></cylinder></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 1</diffuse>
+            <emissive>0.18 0.11 0.06 1</emissive>
+          </material>
+        </visual>
+        <visual name="pad_ring">
+          <pose>0 0 0.001 0 0 0</pose>
+          <geometry><cylinder><radius>2.4</radius><length>0.001</length></cylinder></geometry>
+          <material>
+            <ambient>0.17 0.17 0.17 1</ambient>
+            <diffuse>0.17 0.17 0.17 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="quad">
+      <!-- Starts on the pad; command throttle to take off. -->
+      <pose>0 0 0.05 0 0 0</pose>
+
+      <link name="base_link">
+        <inertial>
+          <mass>1.2</mass>
+          <inertia>
+            <ixx>0.0106</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.0106</iyy><iyz>0</iyz>
+            <izz>0.0202</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.2 0.2 0.06</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 0.2 0.06</size></box></geometry>
+          <material>
+            <ambient>0.13 0.13 0.13 1</ambient>
+            <diffuse>0.13 0.13 0.13 1</diffuse>
+            <specular>0.25 0.25 0.25 1</specular>
+          </material>
+        </visual>
+        <visual name="top_plate">
+          <pose>0 0 0.033 0 0 0</pose>
+          <geometry><box><size>0.12 0.12 0.006</size></box></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 1</diffuse>
+            <specular>0.4 0.3 0.2 1</specular>
+          </material>
+        </visual>
+        <visual name="nose">
+          <pose>0.105 0 0 0 0 0</pose>
+          <geometry><box><size>0.02 0.05 0.03</size></box></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 1</diffuse>
+          </material>
+        </visual>
+        <visual name="arm_fr">
+          <pose>0.065 0.065 0.02 0 0 0.7853981633974483</pose>
+          <geometry><box><size>0.16 0.022 0.012</size></box></geometry>
+          <material>
+            <ambient>0.18 0.18 0.18 1</ambient>
+            <diffuse>0.18 0.18 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="arm_fl">
+          <pose>0.065 -0.065 0.02 0 0 -0.7853981633974483</pose>
+          <geometry><box><size>0.16 0.022 0.012</size></box></geometry>
+          <material>
+            <ambient>0.18 0.18 0.18 1</ambient>
+            <diffuse>0.18 0.18 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="arm_rr">
+          <pose>-0.065 0.065 0.02 0 0 -0.7853981633974483</pose>
+          <geometry><box><size>0.16 0.022 0.012</size></box></geometry>
+          <material>
+            <ambient>0.18 0.18 0.18 1</ambient>
+            <diffuse>0.18 0.18 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="arm_rl">
+          <pose>-0.065 -0.065 0.02 0 0 0.7853981633974483</pose>
+          <geometry><box><size>0.16 0.022 0.012</size></box></geometry>
+          <material>
+            <ambient>0.18 0.18 0.18 1</ambient>
+            <diffuse>0.18 0.18 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+
+      <!-- rotor 0: +x +y, ccw -->
+      <link name="rotor_0">
+        <pose>0.13 0.13 0.03 0 0 0</pose>
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>1e-5</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1e-5</iyy><iyz>0</iyz>
+            <izz>2e-5</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.005</length></cylinder></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 0.55</diffuse>
+            <specular>0.2 0.15 0.1 1</specular>
+          </material>
+        </visual>
+        <visual name="hub">
+          <pose>0 0 -0.008 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_0_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_0</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+          <dynamics><damping>0.0</damping></dynamics>
+        </axis>
+      </joint>
+
+      <!-- rotor 1: +x -y, cw -->
+      <link name="rotor_1">
+        <pose>0.13 -0.13 0.03 0 0 0</pose>
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>1e-5</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1e-5</iyy><iyz>0</iyz>
+            <izz>2e-5</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.005</length></cylinder></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 0.55</diffuse>
+            <specular>0.2 0.15 0.1 1</specular>
+          </material>
+        </visual>
+        <visual name="hub">
+          <pose>0 0 -0.008 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_1_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_1</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+          <dynamics><damping>0.0</damping></dynamics>
+        </axis>
+      </joint>
+
+      <!-- rotor 2: -x -y, ccw -->
+      <link name="rotor_2">
+        <pose>-0.13 -0.13 0.03 0 0 0</pose>
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>1e-5</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1e-5</iyy><iyz>0</iyz>
+            <izz>2e-5</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.005</length></cylinder></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 0.55</diffuse>
+            <specular>0.2 0.15 0.1 1</specular>
+          </material>
+        </visual>
+        <visual name="hub">
+          <pose>0 0 -0.008 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_2_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_2</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+          <dynamics><damping>0.0</damping></dynamics>
+        </axis>
+      </joint>
+
+      <!-- rotor 3: -x +y, cw -->
+      <link name="rotor_3">
+        <pose>-0.13 0.13 0.03 0 0 0</pose>
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>1e-5</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1e-5</iyy><iyz>0</iyz>
+            <izz>2e-5</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>0.005</length></cylinder></geometry>
+          <material>
+            <ambient>0.906 0.541 0.306 1</ambient>
+            <diffuse>0.906 0.541 0.306 0.55</diffuse>
+            <specular>0.2 0.15 0.1 1</specular>
+          </material>
+        </visual>
+        <visual name="hub">
+          <pose>0 0 -0.008 0 0 0</pose>
+          <geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_3_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_3</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+          <dynamics><damping>0.0</damping></dynamics>
+        </axis>
+      </joint>
+
+      <plugin filename="gz-sim-pose-publisher-system"
+              name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>false</publish_link_pose>
+        <publish_visual_pose>false</publish_visual_pose>
+        <publish_collision_pose>false</publish_collision_pose>
+        <publish_sensor_pose>false</publish_sensor_pose>
+        <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>false</publish_nested_model_pose>
+        <use_pose_vector_msg>false</use_pose_vector_msg>
+        <static_publisher>false</static_publisher>
+        <update_frequency>100</update_frequency>
+      </plugin>
+
+      <plugin filename="thrustlab-fmu-gz-system"
+              name="thrustlab::fmu_gz::ThrustlabFmuSystem">
+        <fmu_dir>${TL_FMU_DIR}</fmu_dir>
+        <command_topic>/quad/command/throttle</command_topic>
+        <command_field>position</command_field>
+        <air_density>1.225</air_density>
+        <rotor_velocity_slowdown_sim>10</rotor_velocity_slowdown_sim>
+        <rotor>
+          <index>0</index>
+          <link_name>rotor_0</link_name>
+          <joint_name>rotor_0_joint</joint_name>
+          <actuator_index>0</actuator_index>
+          <sense>ccw</sense>
+        </rotor>
+        <rotor>
+          <index>1</index>
+          <link_name>rotor_1</link_name>
+          <joint_name>rotor_1_joint</joint_name>
+          <actuator_index>1</actuator_index>
+          <sense>cw</sense>
+        </rotor>
+        <rotor>
+          <index>2</index>
+          <link_name>rotor_2</link_name>
+          <joint_name>rotor_2_joint</joint_name>
+          <actuator_index>2</actuator_index>
+          <sense>ccw</sense>
+        </rotor>
+        <rotor>
+          <index>3</index>
+          <link_name>rotor_3</link_name>
+          <joint_name>rotor_3_joint</joint_name>
+          <actuator_index>3</actuator_index>
+          <sense>cw</sense>
+        </rotor>
+      </plugin>
+    </model>
+  </world>
+</sdf>

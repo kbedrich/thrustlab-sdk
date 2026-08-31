@@ -49,7 +49,7 @@ class SimulationResource:
         input_snapshot (None | SimulationResourceInputSnapshotType0 | Unset):
         project_name (None | str | Unset):
         snapshot_version (int | Unset):  Default: 1.
-        solver_engine (str | Unset):  Default: 'prom-rs/0.2.1'.
+        solver_engine (str | Unset):  Default: 'prom-rs/0.2.5'.
     """
 
     analysis_type: str
@@ -75,7 +75,7 @@ class SimulationResource:
     input_snapshot: None | SimulationResourceInputSnapshotType0 | Unset = UNSET
     project_name: None | str | Unset = UNSET
     snapshot_version: int | Unset = 1
-    solver_engine: str | Unset = "prom-rs/0.2.1"
+    solver_engine: str | Unset = "prom-rs/0.2.5"
 
     def to_dict(self) -> dict[str, Any]:
         from thrustlab._models.simulation_resource_battery_topology_type_0 import SimulationResourceBatteryTopologyType0

@@ -1,0 +1,107 @@
+# Y6 coax hexacopter — ArduPilot FRAME_CLASS=5 (Y6), FRAME_TYPE=10 (Y6B).
+#
+# ─── Frames ───────────────────────────────────────────────────────────────────
+# Body FRD (x forward, y right, z down); every rotor thrusts up: axis [0,0,-1].
+# Upper rotors sit above the arm (z −0.035), lower rotors below (z +0.025) —
+# the 0.06 m axial gap matches the exported stacks' spacing.
+#
+# ─── Motor order (verified against ArduPilot master, 2026-08-29) ──────────────
+# libraries/AP_Motors/AP_MotorsMatrix.cpp, setup_y6_matrix, MOTOR_FRAME_TYPE_Y6B:
+#
+#     { -1.0f,  0.500f, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  1 },   // right-front TOP
+#     { -1.0f,  0.500f, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 2 },   // right-front BOTTOM
+#     {  0.0f, -1.000f, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  3 },   // rear TOP
+#     {  0.0f, -1.000f, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 4 },   // rear BOTTOM
+#     {  1.0f,  0.500f, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  5 },   // left-front TOP
+#     {  1.0f,  0.500f, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 6 },   // left-front BOTTOM
+#
+# roll_factor = −y/R and pitch_factor = +x/R, so {−1, +0.5} is the arm at
+# (x, y) = (+0.5, +1)·u — right-front; {0, −1} is the rear arm (−1, 0)·u; and
+# {+1, +0.5} is left-front. "All top motors spinning clockwise, all bottom
+# motors counter clockwise" (the Y6B comment) makes odd servos the TOP rotors:
+# CW prop → sense −1, CCW → +1 (s_i = +1 when the rotor turns CCW viewed
+# against the thrust direction).
+#
+# ─── FMU rotor order ──────────────────────────────────────────────────────────
+# The export orders rotors (stack1 up, stack1 lo, stack2 up, stack2 lo,
+# stack3 up, stack3 lo) — check your export's rotor_manifest. Stacks map to
+# arms as stack1=right-front, stack2=rear, stack3=left-front.
+
+vehicle:
+  name: thrustlab-example-y6
+  # Six rotors of the same disc loading as the 4-rotor validation quad, less
+  # the coax duet's efficiency: hover sits near 55-60% throttle.
+  mass_kg: 1.55
+  inertia_principal: [0.020, 0.020, 0.036]
+  drag_area_m2: [0.025, 0.025, 0.055]
+
+environment:
+  air_density_kg_m3: 1.225
+  ambient_temp_C: 25.0
+  wind_ned_m_s: [0.0, 0.0, 0.0]
+
+ground:
+  enabled: true
+  z_ned_m: 0.0
+
+rotors:
+  - name: right-front-upper
+    rotor_index: 0
+    servo_channel: 1
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.134, 0.268, -0.035]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+  - name: right-front-lower
+    rotor_index: 1
+    servo_channel: 2
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.134, 0.268, 0.025]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+  - name: rear-upper
+    rotor_index: 2
+    servo_channel: 3
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.30, 0.0, -0.035]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+  - name: rear-lower
+    rotor_index: 3
+    servo_channel: 4
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.30, 0.0, 0.025]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+  - name: left-front-upper
+    rotor_index: 4
+    servo_channel: 5
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.134, -0.268, -0.035]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+  - name: left-front-lower
+    rotor_index: 5
+    servo_channel: 6
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.134, -0.268, 0.025]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1

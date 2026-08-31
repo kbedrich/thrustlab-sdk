@@ -8,12 +8,13 @@ A completed dynamic run integrates the powertrain through a throttle/airspeed
 schedule until a termination condition. Its `result` blob carries:
   * scorecard   — whole-run headline metrics (flight_time_s, peak_current_a,
                   min_cell_voltage_v, peak_winding_temp_c, avg_efficiency, ...).
-  * samples[]    — one full steady-shaped snapshot per saved step; each entry has
+  * samples[]    — one full steady-shaped snapshot per returned observation;
+                  accepted-step rows are exact and generally irregular; each has
                   the SAME canonical per-rotor / "All" / "Battery" keys as a
                   single-point result, so display_labels applies to it too.
   * series       — {channel_name: list[float]} aligned to series["time_s"], the
-                  down-sampled plotting source (total_thrust_n, total_current_a,
-                  rotor1_rpm, ...).
+                  plotting source (total_thrust_n, total_current_a, rotor1_rpm,
+                  ...). Always use time_s; do not infer time from the row index.
   * events / run_meta — timestamped run events + step/depletion bookkeeping.
 
 Swap in your own component IDs, or resolve them by name with
@@ -73,25 +74,36 @@ if result["status"] == "completed":
     blob = result["result"]
     labels = result["display_labels"]  # applies to each samples[] entry
 
+    # Accepted-mode row counts: complete stream -> retained export -> display.
+    meta = blob["run_meta"]
+    print(
+        f"reporting: {meta['reporting_mode']}  "
+        f"rows {meta['complete_rows']} -> {meta['retained_rows']} -> {meta['display_rows']}"
+    )
+    print(f"fixed save interval: {meta['save_dt']}")  # None for accepted-step rows
+
     # scorecard: whole-run headline metrics (canonical snake_case).
     print("\n[scorecard]")
     for key, value in blob["scorecard"].items():
         print(f"  {key:<24} {value}")
 
-    # samples[]: each entry is a full steady-shaped snapshot — read the same
+    # samples[]: each entry is a full steady-shaped observation — read the same
     # per-rotor / "All" keys (and display_labels) as a single-point result.
     samples = blob["samples"]
     first, last = samples[0], samples[-1]
-    print(f"\nsteps: {len(samples)}")
+    print(f"\nreturned observations: {len(samples)}")
     print(f"  t0 total_thrust_n: {first['All']['total_thrust_n']:.2f} "
           f"({labels['total_thrust_n']})")
     print(f"  tN total_thrust_n: {last['All']['total_thrust_n']:.2f}")
 
-    # series: down-sampled channels aligned to series["time_s"]. Print a couple.
+    # series: channels aligned to explicit, generally irregular timestamps.
     series = blob["series"]
     print("\n[series channels]")
     print(f"  available: {sorted(series.keys())}")
     time_s = series["time_s"]
+    if len(time_s) > 1:
+        gaps = [b - a for a, b in zip(time_s, time_s[1:])]
+        print(f"  observation dt range: {min(gaps):.6g} .. {max(gaps):.6g} s")
     thrust = series.get("total_thrust_n", [])
     current = series.get("total_current_a", [])
     print("\n  t (s) | total_thrust_n | total_current_a")

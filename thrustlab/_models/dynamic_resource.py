@@ -41,7 +41,7 @@ class DynamicResource:
             object_ (Literal['dynamic_simulation'] | Unset):  Default: 'dynamic_simulation'.
             result (DynamicResourceResultType0 | None | Unset):
             snapshot_version (int | Unset):  Default: 2.
-            solver_engine (str | Unset):  Default: 'prom-rs/0.2.1'.
+            solver_engine (str | Unset):  Default: 'prom-rs/0.2.5'.
     """
 
     credits_cost: int
@@ -59,7 +59,7 @@ class DynamicResource:
     object_: Literal["dynamic_simulation"] | Unset = "dynamic_simulation"
     result: DynamicResourceResultType0 | None | Unset = UNSET
     snapshot_version: int | Unset = 2
-    solver_engine: str | Unset = "prom-rs/0.2.1"
+    solver_engine: str | Unset = "prom-rs/0.2.5"
 
     def to_dict(self) -> dict[str, Any]:
         from thrustlab._models.dynamic_resource_battery_topology_type_0 import DynamicResourceBatteryTopologyType0

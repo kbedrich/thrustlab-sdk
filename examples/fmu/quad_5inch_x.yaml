@@ -1,0 +1,142 @@
+# Generic 5" freestyle quad — ArduPilot FRAME_CLASS=1 (QUAD), FRAME_TYPE=1 (X).
+#
+# ─── Frames ───────────────────────────────────────────────────────────────────
+# All geometry is the ArduPilot BODY frame, FRD: x FORWARD, y RIGHT, z DOWN.
+# Rotors thrust upward, so every `axis` is [0, 0, -1].
+#
+# ─── Motor order (verified against ArduPilot master, 2026-08-29) ──────────────
+# libraries/AP_Motors/AP_MotorsMatrix.cpp, setup_quad_matrix, MOTOR_FRAME_TYPE_X:
+#
+#     static const AP_MotorsMatrix::MotorDef motors[] {
+#         {   45, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  1 },
+#         { -135, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  3 },
+#         {  -45, AP_MOTORS_MATRIX_YAW_FACTOR_CW,   4 },
+#         {  135, AP_MOTORS_MATRIX_YAW_FACTOR_CW,   2 },
+#     };
+#     add_motors(motors, ARRAY_SIZE(motors));   // motor_num = array index
+#
+# `add_motors` passes the array index as motor_num, so entry k is Motor (k+1)
+# and lands on servo output (k+1) via SERVOn_FUNCTION = Motor n. The angle is a
+# bearing in degrees CLOCKWISE from the nose:
+#
+#     add_motor(n, angle, yaw, order) -> add_motor_raw(n, cosf(radians(angle+90)),
+#                                                          cosf(radians(angle)), ...)
+#
+# i.e. roll_factor = -sin(angle), pitch_factor = cos(angle), which is exactly a
+# hub at (x, y) = R*(cos angle, sin angle) in FRD. AP_MotorsMatrix.h defines
+# AP_MOTORS_MATRIX_YAW_FACTOR_CW = -1 and _CCW = +1, naming the PROPELLER's
+# rotation viewed from above.
+#
+#   servo 1 = Motor 1 =   45 deg = FRONT-RIGHT, prop CCW  -> sense +1
+#   servo 2 = Motor 2 = -135 deg = REAR-LEFT,   prop CCW  -> sense +1
+#   servo 3 = Motor 3 =  -45 deg = FRONT-LEFT,  prop CW   -> sense -1
+#   servo 4 = Motor 4 =  135 deg = REAR-RIGHT,  prop CW   -> sense -1
+#
+# `sense` is spec decision 5's s_i: +1 when the rotor turns CCW viewed AGAINST
+# the thrust direction (equivalently, right-handed about the thrust axis). For a
+# copter the thrust axis is up, so "CCW from above" and s_i = +1 coincide.
+#
+# ─── Geometry ─────────────────────────────────────────────────────────────────
+# A 5" quad is typically a 220 mm motor-to-motor diagonal, so each hub sits at
+# radius 0.110 m, i.e. 0.110/sqrt(2) = 0.0778 m on each of x and y.
+#
+# ─── Servo channel mapping ────────────────────────────────────────────────────
+# `servo_channel` is the 1-based ArduPilot output (SERVO1_FUNCTION -> 1). The
+# map to `rotor_index` is explicit and bijective on purpose: ArduPilot permits
+# motor functions on arbitrary outputs, so nothing may be assumed positionally.
+# `rotor_index` is the index into the FMU's flat 0..N-1 rotor arrays, whose
+# order comes from the export's `rotor_manifest`.
+
+vehicle:
+  name: generic-5in-quad-x
+  mass_kg: 0.680
+  # Principal moments about the CG. Substitute a measured or CAD tensor before
+  # you tune anything with these numbers.
+  inertia_principal: [0.0033, 0.0033, 0.0060]
+  # Per-body-axis drag area Cd*A in m^2. Force is -0.5*rho*CdA*|v|*v per axis.
+  drag_area_m2: [0.0090, 0.0090, 0.0180]
+
+environment:
+  air_density_kg_m3: 1.225
+  ambient_temp_C: 25.0
+  # Steady wind in NED m/s. Omit or zero for still air.
+  wind_ned_m_s: [0.0, 0.0, 0.0]
+
+ground:
+  # Flat plane contact so the vehicle can sit, arm and land. z is NED, so the
+  # ground is BELOW the origin at positive z; 0.0 puts it at the home origin.
+  enabled: true
+  z_ned_m: 0.0
+
+fmu:
+  # Sign conventions. Every value below is spec decision 5 REV 2.1 — the
+  # normative physics — and is also the default, so this whole block can be
+  # omitted. The alternatives exist only to fly an export built against the
+  # withdrawn rev 2; they are never what a current export wants. README:
+  # "Sign conventions (decision 5 rev 2.1)".
+
+  # v_axial_i = -(U_i . n_i): POSITIVE in a climb, negative in descent/windmill.
+  # `dot_product` is the withdrawn rev-2 +(U_i . n_i), which reads a climb as a
+  # descent.
+  v_axial_sign: climb_positive
+
+  # F_i = T_i n_i + H_i e_i: e_i is the air-relative in-plane direction, so a
+  # positive force_inplane_N is a DRAG opposing the edgewise motion.
+  # `subtracted` is the withdrawn rev-2 - H_i e_i, which makes H a thrust.
+  inplane_sign: drag_positive
+
+  # torque_Nm[i] = -s_i * Q_i_aero is the SIGNED REACTION on the airframe and is
+  # applied directly; `sense` below is NOT applied again in the moment sum.
+  #   signed    - torque_Nm is that signed reaction (rev 2.1).
+  #   magnitude - torque_Nm is an unsigned aero magnitude, so the bridge forms
+  #               the reaction itself as -sense * |torque_Nm|.
+  torque_convention: signed
+
+  # Last-resort escape hatch if an export's axial reaction still comes out
+  # backwards in SITL. With a rev-2.1 export this stays false.
+  negate_reaction_torque: false
+
+rotors:
+  - name: front-right
+    rotor_index: 0
+    servo_channel: 1
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.0778, 0.0778, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+
+  - name: rear-left
+    rotor_index: 1
+    servo_channel: 2
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.0778, -0.0778, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+
+  - name: front-left
+    rotor_index: 2
+    servo_channel: 3
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.0778, -0.0778, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+
+  - name: rear-right
+    rotor_index: 3
+    servo_channel: 4
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.0778, 0.0778, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1

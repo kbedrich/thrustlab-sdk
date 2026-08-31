@@ -1,0 +1,129 @@
+# Example vehicle: the same 450-class quad-X as examples/fmu/ardupilot_sitl,
+# re-mapped to BETAFLIGHT's motor order. 4 motors, no tilt, no wing.
+#
+# ─── Frames ───────────────────────────────────────────────────────────────────
+# All geometry is the bridge's BODY frame, FRD: x FORWARD, y RIGHT, z DOWN.
+# Rotors thrust upward, so every `axis` is [0, 0, -1]. This is unchanged from
+# the ArduPilot YAML — the bridge's frames are its own, and the Betaflight
+# conversions live in thrustlab/sitl/targets/betaflight.py.
+#
+# ─── ONLY servo_channel MOVED. rotor_index DID NOT. ───────────────────────────
+# `rotor_index` is the index into the FMU's flat 0..N-1 rotor arrays, and that
+# order comes from the EXPORT's rotor_manifest. It is a property of the FMU, not
+# of the autopilot, so it is identical to the ArduPilot YAML's:
+#
+#     rotor_index 0 = front-right   sense +1
+#     rotor_index 1 = rear-left     sense +1
+#     rotor_index 2 = front-left    sense -1
+#     rotor_index 3 = rear-right    sense -1
+#
+# `servo_channel` is the only thing that changes, because Betaflight numbers a
+# quad-X's motors differently from ArduPilot.
+#
+# RENUMBERING rotor_index TO MATCH BETAFLIGHT'S MOTOR ORDER LOOKS TIDY AND
+# SILENTLY KILLS THE YAW AXIS. With `torque_convention: signed` the FMU emits
+# torque_Nm ALREADY SIGNED by the rotation sense its export was built with, and
+# the bridge applies it directly. Renumber the rotors and the FMU's sign pattern
+# no longer lines up with the airframe's diagonal pairs, so the two rotors a yaw
+# command spins up carry OPPOSITE reaction torques and cancel. Measured
+# 2026-08-30 on exactly that mistake: throttles [0.08, 0.84, 0.84, 0.08],
+# torques [-0.0009, -0.0948, +0.0948, +0.0009] — a perfect cancellation — and a
+# full-stick right yaw held for three seconds turned the airframe 0.0 degrees.
+# The flight otherwise looked fine, because a quad with no yaw torque simply has
+# no yaw axis to destabilise.
+#
+# ─── Motor order (verified against Betaflight master 6aeffc36) ────────────────
+# src/main/flight/mixer_init.c:
+#
+#     static const motorMixer_t mixerQuadX[] = {   // { throttle, roll, pitch, yaw }
+#         { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R    = motor 1
+#         { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R   = motor 2
+#         { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L    = motor 3
+#         { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L   = motor 4
+#     };
+#
+# `servo_channel` here is a 1-based index into servo_packet_raw.pwm_output_raw,
+# which sitl.c fills motor-first (pwmWriteMotor writes pwm_output_raw[index]),
+# so channel n carries Betaflight motor n:
+#
+#     channel 1 = M1 REAR_R      channel 3 = M3 REAR_L
+#     channel 2 = M2 FRONT_R     channel 4 = M4 FRONT_L
+#
+# ─── Prop directions ──────────────────────────────────────────────────────────
+# MEASURED, from the flight above: a full-stick RIGHT yaw drives M2 (FRONT_R)
+# and M3 (REAR_L) up and M1/M4 down. Speeding a rotor torques the airframe
+# OPPOSITE the prop's own rotation, so a clockwise (right) airframe response
+# means M2 and M3 spin COUNTER-CLOCKWISE viewed from above, and M1/M4 clockwise.
+# M2/M3 and M1/M4 are diagonal pairs, as they must be.
+#
+# Those are the same PHYSICAL senses as the ArduPilot quad — front-right and
+# rear-left counter-clockwise — which is why the rotor blocks below are
+# character-for-character the ArduPilot YAML's apart from `servo_channel`.
+#
+# `sense` is spec decision 5's s_i: +1 when the rotor turns CCW viewed AGAINST
+# the thrust direction. A copter's thrust is up, so that is CCW from above.
+#
+# ─── PWM calibration ──────────────────────────────────────────────────────────
+# The raw packet on port 9001 carries real microseconds (the port-9002 packet is
+# normalised and capped at four motors). With the shipped SITL defaults that
+# band is 1000-2000, matching the ArduPilot YAML.
+
+vehicle:
+  name: thrustlab-validation-quad-betaflight
+  mass_kg: 1.20
+  inertia_principal: [0.012, 0.012, 0.022]
+  drag_area_m2: [0.020, 0.020, 0.040]
+
+environment:
+  air_density_kg_m3: 1.225
+  ambient_temp_C: 25.0
+  wind_ned_m_s: [0.0, 0.0, 0.0]
+
+ground:
+  enabled: true
+  z_ned_m: 0.0
+
+rotors:
+  - name: front-right
+    rotor_index: 0
+    servo_channel: 2      # Betaflight M2
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.159, 0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+
+  - name: rear-left
+    rotor_index: 1
+    servo_channel: 3      # Betaflight M3
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.159, -0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+
+  - name: front-left
+    rotor_index: 2
+    servo_channel: 4      # Betaflight M4
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.159, -0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+
+  - name: rear-right
+    rotor_index: 3
+    servo_channel: 1      # Betaflight M1
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.159, 0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1

@@ -73,6 +73,7 @@ class Client:
         from thrustlab.resources.starred_components import StarredComponentsResource
         from thrustlab.resources.compute_units import ComputeUnitsResource
         from thrustlab.resources.webhook_endpoints import WebhookEndpointsResource
+        from thrustlab.resources.fmu import FmuResource
 
         self.users = UsersResource(self._transport)
         self.projects = ProjectsResource(self._transport)
@@ -84,6 +85,7 @@ class Client:
         self.starred_components = StarredComponentsResource(self._transport)
         self.compute_units = ComputeUnitsResource(self._transport)
         self.webhook_endpoints = WebhookEndpointsResource(self._transport)
+        self.fmu = FmuResource(self._transport)
         self._resources_initialized = True
 
     def __getattr__(self, name: str):
@@ -91,7 +93,7 @@ class Client:
         if name in {
             "users", "projects", "simulations", "sweeps",
             "dynamic_simulations", "components", "submissions", "starred_components",
-            "compute_units", "webhook_endpoints",
+            "compute_units", "webhook_endpoints", "fmu",
         }:
             self._init_resources()
             return getattr(self, name)

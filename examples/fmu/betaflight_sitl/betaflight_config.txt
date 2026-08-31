@@ -1,0 +1,41 @@
+# Betaflight SITL CLI config for the FMU hover demo.
+#
+# Provision it with a ONE-SHOT run — the binary loads this file, writes
+# eeprom.bin and exits:
+#
+#     ./betaflight_SITL.elf --config betaflight_config.txt
+#
+# then relaunch WITHOUT --config to fly.
+
+# The virtual GPS is fed from fdm_packet.position_xyz; without it the position
+# estimator has no horizontal reference and POSHOLD/AUTOPILOT never arm.
+feature GPS
+set gps_provider = VIRTUAL
+
+# The estimator needs the truth-fed virtual mag as a heading source.
+set trust_mag = ON
+
+# The FMU airframe can sit at attitudes the stock 25-degree arming gate refuses
+# while the 6DOF settles on the ground plane.
+set small_angle = 180
+
+# ALT-HOLD FEEDFORWARD — the one setting the demo cannot leave alone.
+# `ap_hover_throttle` is the throttle the altitude controller assumes will hold
+# a hover; everything else is correction on top of it. The stock 1275 suits a
+# 5" racer at a thrust-to-weight near 4. This 450-class quad on 10x4.7 props
+# hovers at ~1540 (measured from mission_rpm_log.csv: 11.8 N of thrust for an
+# 11.77 N airframe at throttle 0.54), a thrust-to-weight near 1.3. Left at the
+# default, the controller commands roughly a quarter of the thrust needed, the
+# vehicle free-falls out of the hold, and the integrator's recovery turns into
+# a divergent bounce — measured 2026-08-30: 11.8 m to 0.2 m in one second,
+# then a mid-hold disarm.
+#
+# Re-measure this for YOUR airframe. It is a property of the FMU and the mass,
+# not of Betaflight.
+set ap_hover_throttle = 1540
+
+# Mode switches. `aux <slot> <boxId> <auxChannel> <rangeStart> <rangeEnd> ...`
+# where auxChannel 0 is AUX1, i.e. rc_packet channel index 4.
+aux 0 0 0 1700 2100 0 0   # ARM     on AUX1  (box 0)
+aux 1 3 1 1700 2100 0 0   # ALTHOLD on AUX2  (box 3)
+aux 2 1 2 1700 2100 0 0   # ANGLE   on AUX3  (box 1)

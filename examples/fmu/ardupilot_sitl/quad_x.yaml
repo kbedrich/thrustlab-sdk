@@ -1,0 +1,62 @@
+# Example vehicle: a 450-class quad-X (4x 3207 motors + 10x4.7 props, 6S).
+# Edit mass_kg, inertia, drag_area and the rotor positions to YOUR airframe;
+# rotor_index order and sense must agree with your FMU's rotor_manifest.
+# Servo channel -> rotor mapping follows ArduPilot's Quad-X motor order.
+# See the annotated ../quad_5inch_x.yaml for every field.
+
+vehicle:
+  name: thrustlab-validation-quad
+  mass_kg: 1.20
+  inertia_principal: [0.012, 0.012, 0.022]
+  drag_area_m2: [0.020, 0.020, 0.040]
+
+environment:
+  air_density_kg_m3: 1.225
+  ambient_temp_C: 25.0
+  wind_ned_m_s: [0.0, 0.0, 0.0]
+
+ground:
+  enabled: true
+  z_ned_m: 0.0
+
+rotors:
+  - name: front-right
+    rotor_index: 0
+    servo_channel: 1
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.159, 0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+  - name: rear-left
+    rotor_index: 1
+    servo_channel: 2
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.159, -0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+  - name: front-left
+    rotor_index: 2
+    servo_channel: 3
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.159, -0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+  - name: rear-right
+    rotor_index: 3
+    servo_channel: 4
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.159, 0.159, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1

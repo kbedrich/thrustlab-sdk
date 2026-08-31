@@ -6,6 +6,8 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from thrustlab._models.types import UNSET, Unset
+
 T = TypeVar("T", bound="EntitlementsResource")
 
 
@@ -29,6 +31,8 @@ class EntitlementsResource:
                 and every API key. Additional work stays queued.
             sim_types (list[str]):
             weekly_cap (int | None): Compatibility field for a rolling weekly usage cap; null for current tiers.
+            component_specs (bool | Unset): Catalog motor/battery datasheet readout (spec gating 2026-08-30): paid tiers
+                read specs through the leased endpoint; free tier receives identity-only catalog rows. Default: False.
     """
 
     api_access: bool
@@ -40,6 +44,7 @@ class EntitlementsResource:
     max_concurrent_runs: int
     sim_types: list[str]
     weekly_cap: int | None
+    component_specs: bool | Unset = False
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -63,6 +68,8 @@ class EntitlementsResource:
         weekly_cap: int | None
         weekly_cap = self.weekly_cap
 
+        component_specs = self.component_specs
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -78,6 +85,8 @@ class EntitlementsResource:
                 "weekly_cap": weekly_cap,
             }
         )
+        if component_specs is not UNSET:
+            field_dict["component_specs"] = component_specs
 
         return field_dict
 
@@ -112,6 +121,8 @@ class EntitlementsResource:
 
         weekly_cap = _parse_weekly_cap(d.pop("weekly_cap"))
 
+        component_specs = d.pop("component_specs", UNSET)
+
         entitlements_resource = cls(
             api_access=api_access,
             cad_export=cad_export,
@@ -122,6 +133,7 @@ class EntitlementsResource:
             max_concurrent_runs=max_concurrent_runs,
             sim_types=sim_types,
             weekly_cap=weekly_cap,
+            component_specs=component_specs,
         )
 
         entitlements_resource.additional_properties = d

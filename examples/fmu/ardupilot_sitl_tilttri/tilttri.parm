@@ -1,0 +1,30 @@
+# Parameters for the tilt-tricopter bridge flight, applied ON TOP of
+# ArduPilot's plane.parm + quadplane.parm + quadplane-tilttri.parm defaults.
+# The servo map is pinned explicitly so the vehicle YAML never guesses.
+ARMING_CHECK 0
+BATT_MONITOR 4
+Q_M_SPIN_ARM 0.02
+SERVO1_FUNCTION 4
+SERVO2_FUNCTION 19
+SERVO3_FUNCTION 0
+SERVO4_FUNCTION 21
+SERVO5_FUNCTION 33
+SERVO6_FUNCTION 34
+SERVO7_FUNCTION 0
+SERVO8_FUNCTION 36
+SERVO11_FUNCTION 39
+SERVO12_FUNCTION 41
+# ── Powertrain-matched speeds ────────────────────────────────────────────────
+# The demo flies a fine-pitch hover prop (10x4.7, pitch speed ~15 m/s at
+# flyable rpm). The quadplane DEFAULTS assume a plane prop — cruise 25,
+# assist below 18 — speeds this powertrain cannot hold: TECS porpoises
+# trading altitude for airspeed, and assisted flight flaps in and out around
+# 18 m/s, keeping the rear lift rotor spinning in fast edgewise flow the
+# whole flight. Cruise at 13 with assist below 9 keeps the wing loaded, the
+# tilted front rotors inside their sampled axial envelope, and the rear
+# rotor genuinely stopped in cruise — wing-borne flight is the point of the
+# example. Retune these when you change the propeller.
+AIRSPEED_CRUISE 13
+AIRSPEED_MIN 10
+AIRSPEED_MAX 18
+Q_ASSIST_SPEED 9

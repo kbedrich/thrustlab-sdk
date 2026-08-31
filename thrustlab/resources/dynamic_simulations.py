@@ -2,7 +2,8 @@
 
 A dynamic simulation integrates a powertrain through a throttle/airspeed
 *schedule* until a *termination* condition (SOC/voltage cutoff or a fixed
-duration), returning per-step samples, time series, a scorecard, and events.
+duration), returning timestamped observations, time series, a scorecard, and
+events.
 It mirrors the ``client.sweeps`` surface (submit → ``wait()`` → read result).
 
 Endpoints:
@@ -68,7 +69,10 @@ class DynamicSimulationsResource(Resource):
         Body fields (beyond ``project_id``): ``rotor_groups``,
         ``battery_component_id``, ``density_kg_m3``, ``schedule``,
         ``termination`` (all required), plus optional environment/initial-temp
-        overrides. See ``examples/dynamic/run_and_poll.py``.
+        overrides. The v5 solver automatically returns exact accepted-step
+        observations on an explicit irregular time grid; ``reporting`` is an
+        output object, not a public create-body field. See
+        ``examples/dynamic/run_and_poll.py``.
         """
         body = {"project_id": project_id, **params}
         return self._transport.request(

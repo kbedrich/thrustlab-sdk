@@ -1,0 +1,6 @@
+# Parameters the Y6 FMU bridge flight needs on top of copter.parm.
+FRAME_CLASS 5
+FRAME_TYPE 10
+# The bridge feeds pack voltage/current back over the JSON protocol; monitor
+# type 4 (analog V+I) is how the firmware reads them.
+BATT_MONITOR 4

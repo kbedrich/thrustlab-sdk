@@ -1,5 +1,8 @@
 [build-system]
-requires = ["hatchling==1.32.0"]
+# 1.32.0 emits core-metadata 2.5, which PyPI's upload validator does not accept
+# yet (400 Bad Request AFTER the file uploads — measured on the 0.4.0 release,
+# 2026-08-31). 1.27.0 emits metadata 2.4, the newest version Warehouse takes.
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -26,6 +29,11 @@ dependencies = [
   "pydantic>=2.7,<3.0",
   "attrs>=23.0",
   "python-dateutil>=2.8",
+  # The SITL physics bridge (thrustlab.sitl) works out of the box — owner
+  # decision 2026-08-30: no extra, no import-time surprise.
+  "numpy>=1.24",
+  "PyYAML>=6.0",
+  "fmpy>=0.3.31",
 ]
 
 [project.optional-dependencies]
@@ -35,6 +43,12 @@ dev = [
   "respx>=0.21",
   "openapi-python-client==0.28.4",
 ]
+# Kept as an empty alias so `pip install "thrustlab[sitl]"` from early docs
+# still resolves; the bridge dependencies are core requirements now.
+sitl = []
+
+[project.scripts]
+thrustlab-sitl = "thrustlab.sitl.cli:main"
 
 [project.urls]
 Homepage = "https://thrustlab.com"

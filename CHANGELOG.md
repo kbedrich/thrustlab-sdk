@@ -8,6 +8,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-31
+
+### Added
+
+- `client.fmu` can export a completed simulation as an FMI 3.0 co-simulation
+  FMU with per-rotor inputs and outputs, battery and thermal state, and a
+  validity envelope. Exports can be enqueued, checked with paced polling,
+  downloaded when ready, or canceled.
+- The new `thrustlab.sitl` module flies exported FMUs in ArduPilot SITL and
+  Betaflight SITL using a six-degree-of-freedom rigid body, per-rotor servo
+  mapping, and battery voltage, current, and airspeed feedback to the firmware.
+  The `thrustlab-sitl` console command launches the bridge.
+- The new `examples/fmu` gallery includes quadcopter and Y6 SITL missions, an
+  endurance study, and replay rendering.
+- Generated models now cover component datasheets and the `component_specs`
+  entitlement flag.
+
+### Changed
+
+- NumPy, PyYAML, and FMPy are now included in the core installation, so
+  `pip install thrustlab` provides everything needed for SITL. The `[sitl]`
+  extra remains available as an empty compatibility alias.
+
 ## [0.4.0] - 2026-08-27
 
 Contract refresh for the production `/v1/` API. This release adds the current

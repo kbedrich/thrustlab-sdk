@@ -67,6 +67,7 @@ class Transport:
         params: Optional[dict[str, Any]] = None,
         json: Optional[Any] = None,
         idempotency_key: Optional[str] = None,
+        parse_json: bool = True,
     ) -> Any:
         url = self._base_url + path
         headers = {
@@ -96,7 +97,7 @@ class Transport:
                     retry_after = _parse_retry_after(resp)
                     self._sleep(attempt, retry_after=retry_after)
                     continue
-                return self._handle_response(resp)
+                return self._handle_response(resp, parse_json=parse_json)
 
         # Unreachable in practice (loop returns or raises), but pacifies type checker.
         if last_exc is not None:
@@ -113,11 +114,14 @@ class Transport:
         logger.debug("thrustlab: retrying after %.2fs (attempt %d)", delay, attempt + 1)
         time.sleep(delay)
 
-    def _handle_response(self, resp: httpx.Response) -> Any:
+    def _handle_response(self, resp: httpx.Response, *, parse_json: bool = True) -> Any:
         if 200 <= resp.status_code < 300:
             if resp.status_code == 204 or not resp.content:
                 return None
-            return resp.json()
+            # Binary downloads (e.g. the FMU artifact) skip JSON parsing —
+            # the success path is the only one that differs; errors are
+            # always a JSON envelope regardless of the request's own shape.
+            return resp.content if not parse_json else resp.json()
 
         # Error path. Parse envelope: { "error": { "type": ..., "code": ..., "message": ..., "param": ..., "request_id": ... } }.
         body: dict[str, Any] = {}

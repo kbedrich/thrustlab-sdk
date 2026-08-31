@@ -1,0 +1,128 @@
+# Tilt-rotor tricopter QuadPlane — ArduPilot plane + Q_FRAME_CLASS 7 (TRI),
+# Q_TILT_MASK 3: the two front rotors tilt from straight up to straight
+# forward; the rear rotor carries a yaw vane. Convergence-style layout.
+#
+# ─── Servo map (pinned explicitly in tilttri.parm — nothing is default) ──────
+#   servo 1  aileron        servo 5  motor1 = FRONT-RIGHT   (sense +1, CCW)
+#   servo 2  elevator       servo 6  motor2 = FRONT-LEFT    (sense -1, CW)
+#   servo 4  rudder         servo 8  motor4 = REAR          (sense +1, CCW)
+#   servo 11 tri yaw vane (rear rotor tilts about body x)
+#   servo 12 front tilt (both front rotors, up -> forward)
+#
+# Senses per ArduPilot's own SITL tilttri frame (SIM_Frame.cpp,
+# tilttri_motors[], verified 2026-08-29): motor1 CCW, motor2 CW, motor4 CCW.
+#
+# ─── The wing block is DEMO SCAFFOLDING ──────────────────────────────────────
+# The FMU carries the powertrain truth; the wing numbers below are a plausible
+# 1.4 m span flying wing so the transition has lift to hand over to. Replace
+# them with your airframe's numbers — no fidelity is claimed for these.
+
+vehicle:
+  name: thrustlab-example-tilttri
+  mass_kg: 1.25
+  inertia_principal: [0.05, 0.06, 0.10]
+  # Slick nose-on, wing handles its own drag via cd0.
+  drag_area_m2: [0.010, 0.020, 0.035]
+
+wing:
+  area_m2: 0.32
+  span_m: 1.4
+  cl0: 0.2
+  cl_alpha_per_rad: 5.0
+  alpha_stall_deg: 12.0
+  cd0: 0.03
+  oswald: 0.8
+  # Static stability + rate damping (standard non-dimensional derivatives,
+  # rates normalized by {b|c}/2V). Plausible small-flying-wing values; without
+  # them the airframe is neutrally stable in every axis and no autopilot tune
+  # survives the transition.
+  cm_alpha_per_rad: -0.4
+  cm_q: -6.0
+  cn_beta_per_rad: 0.08
+  cn_r: -0.15
+  cl_beta_per_rad: -0.05
+  cl_p: -0.5
+
+control_surfaces:
+  - name: aileron
+    servo_channel: 1
+    pwm_min: 1000
+    pwm_max: 2000
+    moment_axis: [1.0, 0.0, 0.0]
+    moment_coeff_m3: 0.010
+  - name: elevator
+    servo_channel: 2
+    pwm_min: 1000
+    pwm_max: 2000
+    moment_axis: [0.0, 1.0, 0.0]
+    moment_coeff_m3: 0.020
+  - name: rudder
+    servo_channel: 4
+    pwm_min: 1000
+    pwm_max: 2000
+    moment_axis: [0.0, 0.0, 1.0]
+    moment_coeff_m3: 0.008
+
+environment:
+  air_density_kg_m3: 1.225
+  ambient_temp_C: 25.0
+  wind_ned_m_s: [0.0, 0.0, 0.0]
+
+ground:
+  enabled: true
+  z_ned_m: 0.0
+
+rotors:
+  - name: front-right
+    rotor_index: 0
+    servo_channel: 5
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.175, 0.303, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+    tilt:
+      servo_channel: 12
+      pwm_min: 1000
+      pwm_max: 2000
+      angle_min_deg: 0.0
+      angle_max_deg: -90.0
+      hinge_axis: [0.0, 1.0, 0.0]
+  - name: front-left
+    rotor_index: 1
+    servo_channel: 6
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [0.175, -0.303, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: -1
+    tilt:
+      servo_channel: 12
+      pwm_min: 1000
+      pwm_max: 2000
+      angle_min_deg: 0.0
+      angle_max_deg: -90.0
+      hinge_axis: [0.0, 1.0, 0.0]
+  - name: rear
+    rotor_index: 2
+    servo_channel: 8
+    pwm_min: 1000
+    pwm_max: 2000
+    reversed: false
+    spin_arm_threshold: 0.02
+    position: [-0.35, 0.0, 0.0]
+    axis: [0.0, 0.0, -1.0]
+    sense: 1
+    tilt:
+      # The tri yaw vane: the rear rotor rocks about body x, +60 deg at
+      # pwm_min through -60 at pwm_max (SIM_Frame.cpp tilttri_motors[]).
+      servo_channel: 11
+      pwm_min: 1000
+      pwm_max: 2000
+      angle_min_deg: 60.0
+      angle_max_deg: -60.0
+      hinge_axis: [1.0, 0.0, 0.0]
