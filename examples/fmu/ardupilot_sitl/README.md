@@ -22,7 +22,7 @@ state of charge — all from the `.fmu` you exported.
    ```sh
    mkdir -p mission_out
    python -m thrustlab.sitl \
-     --fmu my-powertrain.fmu --vehicle quad_x.yaml \
+     --fmu ../validation-quad.fmu --vehicle quad_x.yaml \
      --rpm-log mission_out/mission_rpm_log.csv
    ```
 
@@ -78,3 +78,12 @@ RPM lane — so the bridge logs it to `mission_out/mission_rpm_log.csv` for
 reconciliation against flight logs. If you changed the vehicle mass in
 `quad_x.yaml`, set `WEIGHT_N` at the top of `plot_mission.py` to match — it
 aligns the two recordings' clocks on the takeoff event.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`../validation-quad.fmu`). The exact powertrain it reproduces is documented
+in the archive's own `resources/README.md`; unzip the FMU to read it. To
+recreate the FMU, build the same powertrain in ThrustLab or through the
+API/SDK, then export it with **Export → FMU** or `client.fmu`; your export
+will fly these examples identically.

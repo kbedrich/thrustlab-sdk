@@ -7,7 +7,7 @@ links — spin-up dynamics, battery state and envelope flags included.
 
 ## What you need
 
-- An exported FMU, **unzipped** (`unzip my-powertrain.fmu -d my-powertrain/`).
+- An exported FMU, **unzipped** (`unzip ../validation-quad.fmu -d validation-quad/`).
 - The `fmu-gz-plugin` ThrustlabFmuSystem plugin, built against gz-sim ≥ 9
   (see its README for the CMake build; it dlopens the FMU's own
   `binaries/x86_64-linux/*.so`).
@@ -61,3 +61,12 @@ For an ArduPilot- or PX4-controlled Gazebo vehicle, keep their standard
 Gazebo integration for control surfaces and use this plugin as the
 propulsion + battery physics; the ArduPilot JSON bridge
 (`thrustlab.sitl`) is the lighter path when you don't need a 3D world.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`../validation-quad.fmu`). The exact powertrain it reproduces is documented
+in the archive's own `resources/README.md`; unzip the FMU to read it. To
+recreate the FMU, build the same powertrain in ThrustLab or through the
+API/SDK, then export it with **Export → FMU** or `client.fmu`; your export
+will fly these examples identically.

@@ -63,6 +63,9 @@ path = "thrustlab/_version.py"
 packages = ["thrustlab"]
 
 [tool.hatch.build.targets.sdist]
+# The bundled example FMUs live in the repo for out-of-the-box examples; the
+# sdist stays source-only (each is 4-10 MB of binary).
+exclude = ["*.fmu"]
 include = [
   "/thrustlab",
   "/tests",

@@ -22,7 +22,7 @@ Same three terminals as the quad example, swapping in this directory's files:
 ```sh
 mkdir -p mission_out
 python -m thrustlab.sitl \
-  --fmu my-y6-powertrain.fmu --vehicle y6.yaml \
+  --fmu example-y6.fmu --vehicle y6.yaml \
   --rpm-log mission_out/mission_rpm_log.csv
 ```
 
@@ -60,3 +60,12 @@ python plot_coax_split.py ./mission_out ./mission_out/plots
 Its bottom panel is the point of the whole example: the lower rotor's share
 of each stack's thrust sits below 50% for the entire flight — the wake
 coupling, resolved per rotor, in a model the autopilot drives at 400 Hz.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`example-y6.fmu`). The exact powertrain it reproduces is documented in the
+archive's own `resources/README.md`; unzip the FMU to read it. To recreate
+the FMU, build the same powertrain in ThrustLab or through the API/SDK, then
+export it with **Export → FMU** or `client.fmu`; your export will fly these
+examples identically.

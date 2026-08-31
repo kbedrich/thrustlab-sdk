@@ -31,7 +31,7 @@ Everything the quad example needs (`../ardupilot_sitl/README.md`), plus:
 ```sh
 mkdir -p mission_out
 python -m thrustlab.sitl \
-  --fmu my-tri-powertrain.fmu --vehicle tilttri.yaml \
+  --fmu example-tri.fmu --vehicle tilttri.yaml \
   --rpm-log mission_out/mission_rpm_log.csv
 ```
 
@@ -74,3 +74,12 @@ physics. And a stopped rotor's flag means nothing: the rear rotor is
 deliberately stopped for most of the circuit while the wing carries the
 weight, so judge the envelope over spinning rotors only — the replay video
 does exactly that.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`example-tri.fmu`). The exact powertrain it reproduces is documented in the
+archive's own `resources/README.md`; unzip the FMU to read it. To recreate
+the FMU, build the same powertrain in ThrustLab or through the API/SDK, then
+export it with **Export → FMU** or `client.fmu`; your export will fly these
+examples identically.

@@ -81,7 +81,7 @@ ls eeprom.bin
 ```bash
 python -m thrustlab.sitl \
   --target betaflight \
-  --fmu ~/validation-quad.fmu \
+  --fmu ../validation-quad.fmu \
   --vehicle betaflight_quad_x.yaml \
   --rpm-log mission_rpm_log.csv \
   --truth-port 9005 \
@@ -240,3 +240,12 @@ servo channels at all. The error reports the received size.
 - Betaflight master provides waypoint navigation through `BOX_AUTOPILOT` and
   `waypoint insert` in the CLI. The bridge supplies the required data, but this
   example does not test it.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`../validation-quad.fmu`). The exact powertrain it reproduces is documented
+in the archive's own `resources/README.md`; unzip the FMU to read it. To
+recreate the FMU, build the same powertrain in ThrustLab or through the
+API/SDK, then export it with **Export → FMU** or `client.fmu`; your export
+will fly these examples identically.

@@ -16,7 +16,7 @@ of extrapolated.
 
 ```sh
 pip install fmpy numpy matplotlib
-python hover_endurance.py my-powertrain.fmu --mass-kg 1.20
+python hover_endurance.py ../validation-quad.fmu --mass-kg 1.20
 ```
 
 `--mass-kg` is the all-up mass WITHOUT payload (airframe + battery).
@@ -29,3 +29,12 @@ each flight — the spread between the two is the battery sag made visible.
 
 Export an FMU with `examples/fmu/export_and_download.py` or the dashboard's
 Share menu.
+
+## The bundled FMU
+
+This example ships with a ready-to-fly FMU exported from ThrustLab
+(`../validation-quad.fmu`). The exact powertrain it reproduces is documented
+in the archive's own `resources/README.md`; unzip the FMU to read it. To
+recreate the FMU, build the same powertrain in ThrustLab or through the
+API/SDK, then export it with **Export → FMU** or `client.fmu`; your export
+will fly these examples identically.
